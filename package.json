@@ -1,4 +1,35 @@
 {
+  "name": "@bodar/totallylazy",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:bodar/totallylazy.js.git"
+  },
+  "author": "Daniel Worthington-Bodart <dan@bodar.com>",
+  "license": "Apache-2.0",
+  "private": false,
+  "bugs": {
+    "url": "https://github.com/bodar/totallylazy/issues"
+  },
+  "homepage": "https://github.com/bodar/totallylazy",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "circular": "madge --extensions ts --circular .",
+    "generate": "esr src/money/generate-currencies.ts",
+    "perf": "esr perf/trie.ts",
+    "prepublishOnly": "sed \"s/0\\.0\\.0/${VERSION}/g\" package.json > ./dist/package.json; cp ./README.md ./dist/",
+    "postpublish": "rm ./dist/package.json ./dist/README.md",
+    "test": "NODE_ENV=development NODE_ICU_DATA=./node_modules/full-icu TZ='America/Los_Angeles' mocha 'test/**/*.test.ts'"
+  },
+  "publishConfig": {
+    "directory": "./dist",
+    "access": "public"
+  },
+  "dependencies": {
+    "tslib": "^2.4.0"
+  },
   "devDependencies": {
     "@types/benchmark": "^1.0.33",
     "@types/chai": "^4.3.3",
@@ -18,5 +49,10 @@
     "wikidata-sdk": "^7.14.4",
     "xmldom": "^0.6.0",
     "xpath": "^0.0.32"
+  },
+  "optionalDependencies": {
+    "@types/node": "^13.13.52",
+    "full-icu": "^1.5.0",
+    "http-shutdown": "^1.2.2"
   }
 }

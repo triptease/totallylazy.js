@@ -1,7 +1,14 @@
 {
-  "files": [],
-  "references": [
-    {"path": "src"},
-    {"path": "test"},
+  "extends": "./tsconfig-base.json",
+  "compilerOptions": {
+    "composite": false,
+    "outDir": "./dist"
+  },
+  "include": [
+    "src/**/*",
+    "test/**/*"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
