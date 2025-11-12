@@ -16,7 +16,7 @@ function build() {
   pnpm install --no-frozen-lockfile # Can't get CI to build without it even when lock file in sync
   pnpm exec madge --circular src/**/*.ts test/**/*.ts
   pnpm exec tsc --build --force
-  pnpm test -r --filter=*test
+  pnpm test
 }
 
 function ci() {

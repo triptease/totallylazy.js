@@ -1,12 +1,33 @@
 version: 2
+
 jobs:
-  build:
-    branches:
-      only: master
+  ci:
     docker:
-      - image: circleci/node:8
+      - image: cimg/node:22.0
     steps:
       - checkout
-      - run:
-          name: build
-          command: ./run ci
+      - run: ./run ci
+
+  test:
+    docker:
+      - image: cimg/node:22.0
+    steps:
+      - checkout
+      - run: ./run build
+
+workflows:
+  version: 2
+
+  master_build:
+    jobs:
+      - ci:
+          filters:
+            branches:
+              only: master
+
+  non_master_build:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore: master
