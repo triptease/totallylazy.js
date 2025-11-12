@@ -13,7 +13,7 @@
   },
   "homepage": "https://github.com/bodar/totallylazy",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "circular": "madge --extensions ts --circular .",

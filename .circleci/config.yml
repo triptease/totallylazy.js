@@ -3,14 +3,14 @@ version: 2
 jobs:
   ci:
     docker:
-      - image: cimg/node:22.0
+      - image: cimg/node:20.0
     steps:
       - checkout
       - run: ./run ci
 
   test:
     docker:
-      - image: cimg/node:22.0
+      - image: cimg/node:20.0
     steps:
       - checkout
       - run: ./run build
