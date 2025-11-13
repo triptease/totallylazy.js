@@ -1,20 +1,46 @@
-version: 2
+version: 2.1
+
+commands:
+  setup_asdf:
+    description: "Setup asdf with caching"
+    steps:
+      - restore_cache:
+          keys:
+            - v1-asdf-{{ checksum ".tool-versions" }}
+            - v1-asdf-
+      - run:
+          name: Install asdf
+          command: |
+            if [ ! -d "$HOME/.asdf" ]; then
+              git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.0
+            fi
+            echo '. ~/.asdf/asdf.sh' >> $BASH_ENV
+            . ~/.asdf/asdf.sh
+            asdf plugin add nodejs || true
+            asdf plugin add pnpm || true
+      - run:
+          name: Install Node.js and pnpm
+          command: asdf install
+      - save_cache:
+          key: v1-asdf-{{ checksum ".tool-versions" }}
+          paths:
+            - ~/.asdf
 
 jobs:
   ci:
     docker:
-      - image: vborja/asdf-alpine
+      - image: cimg/base:stable
     steps:
       - checkout
-      - run: asdf plugin add nodejs && asdf install
+      - setup_asdf
       - run: ./run ci
 
   test:
     docker:
-      - image: vborja/asdf-alpine
+      - image: cimg/base:stable
     steps:
       - checkout
-      - run: asdf plugin add nodejs && asdf install
+      - setup_asdf
       - run: ./run build
 
 workflows:
