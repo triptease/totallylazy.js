@@ -1,7 +1,29 @@
 {
-  "files": [],
-  "references": [
-    {"path": "src"},
-    {"path": "test"},
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "noImplicitAny": true,
+    "strict": true,
+    "module": "commonjs",
+    "target": "ES6",
+    "noEmitOnError": true,
+    "sourceMap": true,
+    "importHelpers": true,
+    "emitDecoratorMetadata": false,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "preserveSymlinks": false,
+    "lib": [
+      "dom",
+      "esnext"
+    ]
+  },
+  "exclude": [
+    "node_modules"
   ]
 }
