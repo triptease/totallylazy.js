@@ -3,16 +3,18 @@ version: 2
 jobs:
   ci:
     docker:
-      - image: cimg/node:20.0
+      - image: vborja/asdf-alpine:nodejs-8.2.1
     steps:
       - checkout
+      - run: asdf install
       - run: ./run ci
 
   test:
     docker:
-      - image: cimg/node:20.0
+      - image: vborja/asdf-alpine:nodejs-8.2.1
     steps:
       - checkout
+      - run: asdf install
       - run: ./run build
 
 workflows:
