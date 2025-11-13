@@ -3,18 +3,18 @@ version: 2
 jobs:
   ci:
     docker:
-      - image: vborja/asdf-alpine:nodejs-8.2.1
+      - image: vborja/asdf-alpine
     steps:
       - checkout
-      - run: asdf install
+      - run: asdf plugin add nodejs && asdf install
       - run: ./run ci
 
   test:
     docker:
-      - image: vborja/asdf-alpine:nodejs-8.2.1
+      - image: vborja/asdf-alpine
     steps:
       - checkout
-      - run: asdf install
+      - run: asdf plugin add nodejs && asdf install
       - run: ./run build
 
 workflows:
