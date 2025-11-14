@@ -79,7 +79,7 @@ importers:
       http-shutdown:
         specifier: ^1.2.2
         version: 1.2.2
-    publishDirectory: ../dist
+    publishDirectory: ./dist
 
   src:
     dependencies:

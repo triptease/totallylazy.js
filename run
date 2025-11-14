@@ -4,8 +4,6 @@ set -Eeo pipefail
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 export NPM_TOKEN=${NPM_TOKEN-}
 
-source ${dir}/nvm.sh
-
 if [[ ! $(command -v pnpm) ]]; then
     npm install -g pnpm
 fi
@@ -21,6 +19,7 @@ function build() {
 
 function ci() {
   build
+  pnpm run artifactregistry-login
   pnpm publish -r --filter=!*test --no-git-checks --tag ${TAG}
 }
 
