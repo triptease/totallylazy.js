@@ -1,5 +1,5 @@
 {
-    "name": "@bodar/totallylazy",
+    "name": "@triptease/localised-parsing",
     "version": "0.0.0",
     "repository": {
         "type": "git",
@@ -16,13 +16,16 @@
         "circular": "madge --extensions ts --circular .",
         "generate": "esr money/generate-currencies.ts",
         "perf": "esr perf/trie.ts",
-        "prepublishOnly": "sed \"s/0\\.0\\.0/${VERSION}/g\" package.json > ../dist/package.json; cp ../README.md ../dist/",
-        "postpublish": "rm ../dist/package.json ../dist/README.md",
-        "test": "NODE_ENV=development NODE_ICU_DATA=./node_modules/full-icu TZ='America/Los_Angeles' mocha 'test/**/*.test.ts'"
+        "clean": "find . -type f \\( -name '*.js' -o -name '*.js.map' -o -name '*.d.ts' \\) -not -path '*/node_modules/*' -not -path '*/dist/*' -delete",
+        "prepublishOnly": "mkdir -p ./dist && sed \"s/0\\.0\\.0/${VERSION}/g\" package.json > ./dist/package.json; cp -r ./README.md ./src ./dist/",
+        "postpublish": "rm -r ./dist/",
+        "test": "NODE_ENV=development NODE_ICU_DATA=./node_modules/full-icu TZ='America/Los_Angeles' mocha 'test/**/*.test.ts'",
+        "artifactregistry-login": "npx google-artifactregistry-auth"
     },
     "publishConfig": {
-        "directory": "../dist",
-        "access": "public"
+        "directory": "./dist",
+        "access": "public",
+        "registry": "https://us-east1-npm.pkg.dev/triptease-onboard/localised-parsing/"
     },
     "dependencies": {
         "tslib": "^2.4.0"
