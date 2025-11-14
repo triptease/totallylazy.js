@@ -1,9 +1,9 @@
 import {File} from '../src/files';
 import {assert} from 'chai';
-import {run} from "../src/run";
-import {array} from "../src/array";
+import {run} from '../src/run';
+import {array} from '../src/array';
 
-describe("run", function () {
+describe('run', function () {
     function script(name: string) {
         return [new File('example-scripts/' + name, __dirname).absolutePath];
     }

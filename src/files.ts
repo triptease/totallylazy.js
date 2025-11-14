@@ -3,14 +3,14 @@ import * as os from 'os';
 import * as path from 'path';
 import {promisify} from 'util';
 import {lazy} from './lazy';
-import {Stats} from "fs";
+import {Stats} from 'fs';
 import {Readable, Writable} from 'stream';
 
 export class File {
-    public absolutePath:string;
+    public absolutePath: string;
 
-    constructor(pathOrName: string, parent:string | File = process.cwd()) {
-        if(pathOrName.charAt(0) === '/') {
+    constructor(pathOrName: string, parent: string | File = process.cwd()) {
+        if (pathOrName.charAt(0) === '/') {
             this.absolutePath = pathOrName;
         } else {
             this.absolutePath = path.resolve(parent instanceof File ? parent.absolutePath : parent, pathOrName);
@@ -32,7 +32,7 @@ export class File {
         return new File(name, this.absolutePath);
     }
 
-    async* children(): AsyncIterable<File> {
+    async *children(): AsyncIterable<File> {
         const names: string[] = await promisify(fs.readdir)(this.absolutePath);
         yield* names.map(name => this.child(name));
     }
@@ -42,14 +42,17 @@ export class File {
     }
 
     get exists(): Promise<boolean> {
-        return this.stats.then(ignore => true, ignore => false);
+        return this.stats.then(
+            ignore => true,
+            ignore => false
+        );
     }
 
     get stats(): Promise<Stats> {
         return promisify(fs.lstat)(this.absolutePath);
     }
 
-    async* descendants(): AsyncIterable<File> {
+    async *descendants(): AsyncIterable<File> {
         for await (const child of this.children()) {
             if (await child.isDirectory) yield* child.descendants();
             yield child;
@@ -60,9 +63,9 @@ export class File {
         return await promisify(fs.readFile)(this.absolutePath);
     }
 
-    async content(newContent?:string): Promise<string> {
-        if(newContent) {
-            (await promisify(fs.writeFile)(this.absolutePath, newContent));
+    async content(newContent?: string): Promise<string> {
+        if (newContent) {
+            await promisify(fs.writeFile)(this.absolutePath, newContent);
             return newContent;
         }
         return (await promisify(fs.readFile)(this.absolutePath, 'utf-8')).toString();
@@ -73,21 +76,20 @@ export class File {
     }
 
     async append(data: any, options?: FileOptions): Promise<void> {
-        return await promisify(fs.appendFile)(this.absolutePath, data, options)
+        return await promisify(fs.appendFile)(this.absolutePath, data, options);
     }
 
     write(options?: StreamOptions): Writable {
         return fs.createWriteStream(this.absolutePath, options);
     }
 
-
     async mkdir(): Promise<File> {
-        if (!await this.exists) await promisify(fs.mkdir)(this.absolutePath);
+        if (!(await this.exists)) await promisify(fs.mkdir)(this.absolutePath);
         return this;
     }
 
     async delete(): Promise<void> {
-        if (!await this.exists) return Promise.resolve();
+        if (!(await this.exists)) return Promise.resolve();
         if (await this.isDirectory) {
             for await (const descendant of this.descendants()) await descendant.delete();
             return await promisify(fs.rmdir)(this.absolutePath);
@@ -105,19 +107,19 @@ export class File {
             return await promisify(fs.copyFile)(this.absolutePath, destination.absolutePath, flags);
         }
     }
-
 }
 
-export type FileOptions = { encoding?: string | null, mode?: string | number, flag?: string } | string
+export type FileOptions = {encoding?: string | null; mode?: string | number; flag?: string} | string;
 
-export type StreamOptions = string | {
-    flags?: string;
-    encoding?: string;
-    fd?: number;
-    mode?: number;
-    autoClose?: boolean;
-    start?: number;
-    end?: number;
-    highWaterMark?: number;
-}
-
+export type StreamOptions =
+    | string
+    | {
+          flags?: string;
+          encoding?: string;
+          fd?: number;
+          mode?: number;
+          autoClose?: boolean;
+          start?: number;
+          end?: number;
+          highWaterMark?: number;
+      };

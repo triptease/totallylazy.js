@@ -1,24 +1,31 @@
 import {assert} from 'chai';
 import {
     CurrencySymbols,
-    format, Formatter, toPartsPonyfill,
+    format,
+    Formatter,
+    toPartsPonyfill,
     money,
     moneyFrom,
     parse,
     parser,
-    partsFrom, PartsFromFormat, RegexBuilder, symbolFor, infer, prefer,
-} from "../../src/money";
-import {locales} from "../dates/dates.test";
-import {currencies} from "../../src/money/currencies";
-import {runningInNode} from "../../src/node";
+    partsFrom,
+    PartsFromFormat,
+    RegexBuilder,
+    symbolFor,
+    infer,
+    prefer,
+} from '../../src/money';
+import {locales} from '../dates/dates.test';
+import {currencies} from '../../src/money/currencies';
+import {runningInNode} from '../../src/node';
 import NumberFormatPart = Intl.NumberFormatPart;
-import {Currency} from "../../src/money/currencies-def";
-import {get} from "../../src/functions";
+import {Currency} from '../../src/money/currencies-def';
+import {get} from '../../src/functions';
 
 export const numberLocales = locales.flatMap(locale => get(() => Intl.NumberFormat.supportedLocalesOf(locale), []));
-const amounts = [1234567.89, 156, 156.89, .1234, 0];
+const amounts = [1234567.89, 156, 156.89, 0.1234, 0];
 
-describe("Money", function () {
+describe('Money', function () {
     this.timeout(10000);
 
     it('should use exact match for currency code or symbol', function () {
@@ -56,7 +63,7 @@ describe("Money", function () {
     it('formatToPartsPonyfill', function () {
         assert.deepEqual(toPartsPonyfill(money('GBP', 123456.78), 'en'), [
             {type: 'currency', value: 'GBP'},
-            {type: "literal", value: " "},
+            {type: 'literal', value: ' '},
             {type: 'integer', value: '123'},
             {type: 'group', value: ','},
             {type: 'integer', value: '456'},
@@ -80,7 +87,8 @@ describe("Money", function () {
     });
 
     it('can convert parts to money', () => {
-        const isoParts: NumberFormatPart[] = [{type: 'currency', value: 'EUR'},
+        const isoParts: NumberFormatPart[] = [
+            {type: 'currency', value: 'EUR'},
             {type: 'literal', value: ' '},
             {type: 'integer', value: '1'},
             {type: 'group', value: ','},
@@ -88,13 +96,15 @@ describe("Money", function () {
             {type: 'group', value: ','},
             {type: 'integer', value: '567'},
             {type: 'decimal', value: '.'},
-            {type: 'fraction', value: '89'}];
+            {type: 'fraction', value: '89'},
+        ];
 
         assert.deepEqual(moneyFrom(isoParts, 'en'), money('EUR', 1234567.89));
     });
 
     it('can convert money to parts', () => {
-        assert.deepEqual(partsFrom(money('EUR', 1234567.89), 'en'), [{type: 'currency', value: 'EUR'},
+        assert.deepEqual(partsFrom(money('EUR', 1234567.89), 'en'), [
+            {type: 'currency', value: 'EUR'},
             {type: 'literal', value: ' '},
             {type: 'integer', value: '1'},
             {type: 'group', value: ','},
@@ -102,7 +112,8 @@ describe("Money", function () {
             {type: 'group', value: ','},
             {type: 'integer', value: '567'},
             {type: 'decimal', value: '.'},
-            {type: 'fraction', value: '89'}]);
+            {type: 'fraction', value: '89'},
+        ]);
     });
 
     it('defaults to prefering GBP as all pound currencies are pegged at 1 to 1', () => {
@@ -124,18 +135,18 @@ describe("Money", function () {
     });
 
     it('should infer currency if preferred currency is undefined', function () {
-        assert.deepEqual(parser('en-AU', {strategy: prefer(undefined)}).parse('$ 2890.30'), money('AUD', 2890.30));
+        assert.deepEqual(parser('en-AU', {strategy: prefer(undefined)}).parse('$ 2890.30'), money('AUD', 2890.3));
     });
 
     it('can parse ambiguous real examples with a custom strategy', () => {
-        assert.deepEqual(parser('en', {strategy: prefer('CNY')}).parse('¥ 2890.30'), money('CNY', 2890.30));
-        assert.deepEqual(parser('en', {strategy: prefer('CNY')}).parse('GBP 2890.30'), money('GBP', 2890.30));
-        assert.deepEqual(parser('en', {strategy: prefer('USD')}).parse('$ 433.80'), money('USD', 433.80));
+        assert.deepEqual(parser('en', {strategy: prefer('CNY')}).parse('¥ 2890.30'), money('CNY', 2890.3));
+        assert.deepEqual(parser('en', {strategy: prefer('CNY')}).parse('GBP 2890.30'), money('GBP', 2890.3));
+        assert.deepEqual(parser('en', {strategy: prefer('USD')}).parse('$ 433.80'), money('USD', 433.8));
         const p = parser('en', {strategy: prefer('USD', 'CNY')});
-        assert.deepEqual(p.parse('$ 433.80'), money('USD', 433.80));
-        assert.deepEqual(p.parse('¥ 2890.30'), money('CNY', 2890.30));
+        assert.deepEqual(p.parse('$ 433.80'), money('USD', 433.8));
+        assert.deepEqual(p.parse('¥ 2890.30'), money('CNY', 2890.3));
         assert.deepEqual(parser('en', {strategy: prefer('KRW')}).parse('₩ 398526.56'), money('KRW', 398526.56));
-        assert.deepEqual(parser('en').parse('KSh 34,202.20'), money('KES', 34202.20));
+        assert.deepEqual(parser('en').parse('KSh 34,202.20'), money('KES', 34202.2));
         assert.deepEqual(parser('en').parse('AED 1204.99'), money('AED', 1204.99));
 
         // This is a weird hotchpotch of formats, semi english decimal with hungarian symbol
@@ -143,21 +154,30 @@ describe("Money", function () {
         // but english could be HUF 95,065.22
         assert.deepEqual(parser('en', {format: 'iii.fff CCC'}).parse('95065.22 Ft'), money('HUF', 95065.22));
 
-        assert.deepEqual(parser('en', {format: 'iii.fff CCC'}).parse('80.40 GBP'), money('GBP', 80.40));
-        assert.deepEqual(parser('en', {format: 'iii iii,ff CCC'}).parse('1' + String.fromCharCode(8239) + '025,00 EUR'), money('EUR', 1025.00));
+        assert.deepEqual(parser('en', {format: 'iii.fff CCC'}).parse('80.40 GBP'), money('GBP', 80.4));
+        assert.deepEqual(
+            parser('en', {format: 'iii iii,ff CCC'}).parse('1' + String.fromCharCode(8239) + '025,00 EUR'),
+            money('EUR', 1025.0)
+        );
         assert.deepEqual(parser('en', {format: 'i,i CCC'}).parse('550,000 IDR'), money('IDR', 550000));
     });
 
     it('can accept format strings directly in the parse method', () => {
-        assert.deepEqual(parse('80.40 GBP', 'en', {format: 'iii.fff CCC'}), money('GBP', 80.40));
-        assert.deepEqual(parse('1' + String.fromCharCode(8239) + '025,00 EUR', 'en', {format: 'iii iii,ff CCC'}), money('EUR', 1025.00));
+        assert.deepEqual(parse('80.40 GBP', 'en', {format: 'iii.fff CCC'}), money('GBP', 80.4));
+        assert.deepEqual(
+            parse('1' + String.fromCharCode(8239) + '025,00 EUR', 'en', {format: 'iii iii,ff CCC'}),
+            money('EUR', 1025.0)
+        );
         assert.deepEqual(parse('550,000 IDR', 'en', {format: 'i,i CCC'}), money('IDR', 550000));
     });
 
     it('treats all forms of space as the same including nbsp 160 & 8239', () => {
         const spaces = [8239];
         for (const space of spaces) {
-            assert.deepEqual(parser('fr').parse(`1${String.fromCharCode(space)}025,00${String.fromCharCode(space)}EUR`), money('EUR', 1025.00));
+            assert.deepEqual(
+                parser('fr').parse(`1${String.fromCharCode(space)}025,00${String.fromCharCode(space)}EUR`),
+                money('EUR', 1025.0)
+            );
         }
     });
 
@@ -167,14 +187,14 @@ describe("Money", function () {
     });
 
     it('does not match any additional money when they adjoin', function () {
-        assert.deepEqual(parser('en').parseAll('You save 11.40 EUR    102.60 EUR'),
-            [money('EUR', 11.4), money('EUR', 102.6)]);
+        assert.deepEqual(parser('en').parseAll('You save 11.40 EUR    102.60 EUR'), [
+            money('EUR', 11.4),
+            money('EUR', 102.6),
+        ]);
 
-        assert.deepEqual(parser('en').parseAll('11.40 EUR 102.60 EUR'),
-            [money('EUR', 11.4), money('EUR', 102.6)]);
+        assert.deepEqual(parser('en').parseAll('11.40 EUR 102.60 EUR'), [money('EUR', 11.4), money('EUR', 102.6)]);
 
-        assert.deepEqual(parser('en').parseAll('EUR 11.40    EUR 102.60'),
-            [money('EUR', 11.4), money('EUR', 102.6)]);
+        assert.deepEqual(parser('en').parseAll('EUR 11.40    EUR 102.60'), [money('EUR', 11.4), money('EUR', 102.6)]);
 
         // Think this one would need a full grammar as currency is already non-greedy
         //
@@ -183,8 +203,7 @@ describe("Money", function () {
     });
 
     it('when a format string is provided automatically go into strict mode so the currency symbol has to be exactly where the user specifies', function () {
-        assert.deepEqual(parser('en', {format: 'C i,i.f'}).parseAll('You save 11.40 EUR    102.60 EUR'),
-            []);
+        assert.deepEqual(parser('en', {format: 'C i,i.f'}).parseAll('You save 11.40 EUR    102.60 EUR'), []);
     });
 
     it('can convert format string to parts', () => {
@@ -193,24 +212,24 @@ describe("Money", function () {
         const parts: NumberFormatPart[] = PartsFromFormat.format.parse(f);
         assert.deepEqual(parts, [
             {type: 'integer', value: 'i'},
-            {type: "group", value: ','},
+            {type: 'group', value: ','},
             {type: 'integer', value: 'iii'},
-            {type: "decimal", value: '.'},
-            {type: "fraction", value: 'fff'},
-            {type: "literal", value: ' '},
-            {type: "currency", value: 'CCC'},
+            {type: 'decimal', value: '.'},
+            {type: 'fraction', value: 'fff'},
+            {type: 'literal', value: ' '},
+            {type: 'currency', value: 'CCC'},
         ] as NumberFormatPart[]);
     });
 
-
     it('can parse multiple monies in a string', function () {
-        assert.deepEqual(parser('en').parseAll('Total: USD 100 Tax: USD 10'),
-            [money('USD', 100), money('USD', 10)]);
+        assert.deepEqual(parser('en').parseAll('Total: USD 100 Tax: USD 10'), [money('USD', 100), money('USD', 10)]);
     });
 
     it('ignores values that are very nearly valid money', function () {
-        assert.deepEqual(parser('en').parseAll('Total: USD 100 Tax: USD 10 Nearly: DAN 10'),
-            [money('USD', 100), money('USD', 10)]);
+        assert.deepEqual(parser('en').parseAll('Total: USD 100 Tax: USD 10 Nearly: DAN 10'), [
+            money('USD', 100),
+            money('USD', 10),
+        ]);
     });
 
     it('has ponyfill for formatToParts', () => {
@@ -228,17 +247,18 @@ describe("Money", function () {
     });
 
     it('can parse arabic numerals, separators and symbols', function () {
-        assert.deepEqual(parser('ar-EG').parseAll( '١٢٬٣٤٥٬٦٧٠٫٨٩ ج.م.‏'), [money('EGP', 12345670.89)]);
+        assert.deepEqual(parser('ar-EG').parseAll('١٢٬٣٤٥٬٦٧٠٫٨٩ ج.م.‏'), [money('EGP', 12345670.89)]);
     });
-
 });
 
-export const currenciesWithDifferentDecimals: [string, Currency][] = Object.values(Object.entries(currencies).reduce((a, [code, currency]) => {
-    a[currency.decimals] = [code, currency];
-    return a;
-}, {} as any));
+export const currenciesWithDifferentDecimals: [string, Currency][] = Object.values(
+    Object.entries(currencies).reduce((a, [code, currency]) => {
+        a[currency.decimals] = [code, currency];
+        return a;
+    }, {} as any)
+);
 
-describe("CurrencySymbols", function () {
+describe('CurrencySymbols', function () {
     before(function () {
         if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
             console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
@@ -281,18 +301,15 @@ describe("CurrencySymbols", function () {
     });
 });
 
-
-describe("RegexBuilder", function () {
+describe('RegexBuilder', function () {
     it('buildParts ensures that a currency and a space literal are at the start and end of the produced parts - needed to ensure Safari is as flexible in parsing as the other browsers', () => {
-        const parts = RegexBuilder.buildParts(partsFrom(money('GBP', 1), 'en-GB', "symbol"));
+        const parts = RegexBuilder.buildParts(partsFrom(money('GBP', 1), 'en-GB', 'symbol'));
         assert.deepEqual(parts, [
             {type: 'currency', value: '£'},
             {type: 'literal', value: ' '},
             {type: 'integer', value: '1'},
             {type: 'literal', value: ' '},
-            {type: 'currency', value: '£'}
+            {type: 'currency', value: '£'},
         ]);
     });
 });
-
-

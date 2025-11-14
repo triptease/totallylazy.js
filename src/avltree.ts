@@ -1,5 +1,5 @@
-import {ascending, by, Comparator} from "./collections";
-import {lazy} from "./lazy";
+import {ascending, by, Comparator} from './collections';
+import {lazy} from './lazy';
 
 export interface Result<K, V> {
     tree: AVLTree<K, V>;
@@ -8,8 +8,7 @@ export interface Result<K, V> {
 }
 
 export abstract class AVLTree<K, V> {
-    protected constructor(public comparator: Comparator<K>) {
-    }
+    protected constructor(public comparator: Comparator<K>) {}
 
     static empty<K, V>(comparator: Comparator<K> = ascending): AVLTree<K, V> {
         return new Empty<K, V>(comparator);
@@ -24,9 +23,7 @@ export abstract class AVLTree<K, V> {
         return AVLTree.preSorted(entries.sort(by(0)), comparator, AVLTree.empty<K, V>(comparator));
     }
 
-    private static preSorted<K, V>(entries: [K, V][],
-                          comparator: Comparator<K>,
-                          empty: AVLTree<K, V>): AVLTree<K, V> {
+    private static preSorted<K, V>(entries: [K, V][], comparator: Comparator<K>, empty: AVLTree<K, V>): AVLTree<K, V> {
         const length = entries.length;
         switch (length) {
             case 0:
@@ -44,7 +41,6 @@ export abstract class AVLTree<K, V> {
             }
         }
     }
-
 
     abstract readonly isEmpty: boolean;
 
@@ -75,7 +71,6 @@ export abstract class AVLTree<K, V> {
     abstract values(): Iterable<V>;
 
     abstract entries(): Iterable<[K, V]>;
-
 }
 
 class Empty<K, V> extends AVLTree<K, V> {
@@ -92,7 +87,7 @@ class Empty<K, V> extends AVLTree<K, V> {
     }
 
     contains(key: K): boolean {
-        return false
+        return false;
     }
 
     lookup(key: K): V | undefined {
@@ -123,25 +118,27 @@ class Empty<K, V> extends AVLTree<K, V> {
         return '';
     }
 
-    * keys(): Iterable<K> {
+    *keys(): Iterable<K> {
         return;
     }
 
-    * values(): Iterable<V> {
+    *values(): Iterable<V> {
         return;
     }
 
-    * entries(): Iterable<[K, V]> {
+    *entries(): Iterable<[K, V]> {
         return [];
     }
 }
 
 class Node<K, V> extends AVLTree<K, V> {
-    constructor(comparator: Comparator<K>,
-                public key: K,
-                public value: V,
-                public left: AVLTree<K, V>,
-                public right: AVLTree<K, V>) {
+    constructor(
+        comparator: Comparator<K>,
+        public key: K,
+        public value: V,
+        public left: AVLTree<K, V>,
+        public right: AVLTree<K, V>
+    ) {
         super(comparator);
     }
 
@@ -177,7 +174,7 @@ class Node<K, V> extends AVLTree<K, V> {
             return {
                 tree: balance(new Node(this.comparator, key!, value!, tree, this.right)),
                 key: this.key,
-                value: this.value
+                value: this.value,
             };
         }
         if (difference < 0) {
@@ -185,14 +182,14 @@ class Node<K, V> extends AVLTree<K, V> {
             return {
                 tree: this.replaceLeft(tree),
                 key: deletedKey,
-                value: deletedValue
+                value: deletedValue,
             };
         }
         const {tree, key: deletedKey, value: deletedValue} = this.right.delete(key);
         return {
             tree: this.replaceRight(tree),
             key: deletedKey,
-            value: deletedValue
+            value: deletedValue,
         };
     }
 
@@ -212,7 +209,7 @@ class Node<K, V> extends AVLTree<K, V> {
         return {
             tree: this.replaceLeft(tree),
             key,
-            value
+            value,
         };
     }
 
@@ -222,7 +219,7 @@ class Node<K, V> extends AVLTree<K, V> {
         return {
             tree: this.replaceRight(tree),
             key,
-            value
+            value,
         };
     }
 
@@ -246,19 +243,19 @@ class Node<K, V> extends AVLTree<K, V> {
         return Math.max(this.left.height, this.right.height) + 1;
     }
 
-    * keys(): Iterable<K> {
+    *keys(): Iterable<K> {
         yield* this.left.keys();
         yield this.key;
         yield* this.right.keys();
     }
 
-    * values(): Iterable<V> {
+    *values(): Iterable<V> {
         yield* this.left.values();
         yield this.value;
         yield* this.right.values();
     }
 
-    * entries(): Iterable<[K, V]> {
+    *entries(): Iterable<[K, V]> {
         yield* this.left.entries();
         yield [this.key, this.value];
         yield* this.right.entries();

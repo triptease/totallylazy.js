@@ -1,5 +1,5 @@
 export interface Clock {
-    now(): Date
+    now(): Date;
 }
 
 export class SystemClock implements Clock {
@@ -9,8 +9,7 @@ export class SystemClock implements Clock {
 }
 
 export class StoppedClock implements Clock {
-    constructor(private value: Date) {
-    }
+    constructor(private value: Date) {}
 
     now(): Date {
         return this.value;

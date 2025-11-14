@@ -1,17 +1,16 @@
-import {Mapper} from "../collections";
-import {Transducer} from "./transducer";
+import {Mapper} from '../collections';
+import {Transducer} from './transducer';
 
 export class FlatMapTransducer<A, B> implements Transducer<A, B> {
-    constructor(public mapper: Mapper<A, Iterable<B> | AsyncIterable<B>>) {
-    }
+    constructor(public mapper: Mapper<A, Iterable<B> | AsyncIterable<B>>) {}
 
-    async* async_(iterable: AsyncIterable<A>): AsyncIterable<B> {
+    async *async_(iterable: AsyncIterable<A>): AsyncIterable<B> {
         for await (const a of iterable) {
             yield* this.mapper(a) as any as AsyncIterable<B>;
         }
     }
 
-    * sync(iterable: Iterable<A>): Iterable<B> {
+    *sync(iterable: Iterable<A>): Iterable<B> {
         for (const a of iterable) {
             yield* this.mapper(a) as any as Iterable<B>;
         }

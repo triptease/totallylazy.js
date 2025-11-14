@@ -1,9 +1,9 @@
 import {assert} from 'chai';
-import {DEFAULT_COMPARATOR, Pair, pair, PrefixTree, Row, Trie, TrieFactory} from "../src/trie";
-import {characters} from "../src/characters";
-import {array} from "../src/array";
+import {DEFAULT_COMPARATOR, Pair, pair, PrefixTree, Row, Trie, TrieFactory} from '../src/trie';
+import {characters} from '../src/characters';
+import {array} from '../src/array';
 
-describe("Trie", function () {
+describe('Trie', function () {
     it('supports isEmpty', function () {
         assert.equal(new Trie().isEmpty, true);
         assert.equal(new Trie().insert(['a'], 'value').isEmpty, false);
@@ -59,7 +59,11 @@ describe("Trie", function () {
 
     it('supports entries', function () {
         const trie = new Trie().insert(['a'], 'valueA').insert(['a', 'b'], 'valueB').insert(['c', 'a', 'd'], 'valueC');
-        assert.deepEqual(array(trie.entries()), [[['a'], 'valueA'], [['a', 'b'], 'valueB'], [['c', 'a', 'd'], 'valueC']]);
+        assert.deepEqual(array(trie.entries()), [
+            [['a'], 'valueA'],
+            [['a', 'b'], 'valueB'],
+            [['c', 'a', 'd'], 'valueC'],
+        ]);
     });
 
     it('supports keys', function () {
@@ -73,7 +77,7 @@ describe("Trie", function () {
     });
 });
 
-describe("PrefixTree", function () {
+describe('PrefixTree', function () {
     it('supports isEmpty', function () {
         assert.equal(new PrefixTree().isEmpty, true);
         assert.equal(new PrefixTree().insert('value').isEmpty, false);
@@ -105,70 +109,57 @@ describe("PrefixTree", function () {
         const valueA = 'valueA';
         const valueB = 'valueB';
         const trie = new PrefixTree().insert(valueA).insert(valueB);
-        assert.deepEqual(trie.match(""), [valueA, valueB]);
-        assert.deepEqual(trie.delete(valueB).match(""), [valueA]);
-        assert.deepEqual(trie.delete(valueA).delete(valueB).match(""), []);
+        assert.deepEqual(trie.match(''), [valueA, valueB]);
+        assert.deepEqual(trie.delete(valueB).match(''), [valueA]);
+        assert.deepEqual(trie.delete(valueA).delete(valueB).match(''), []);
     });
 
     it('value can be a different type', function () {
-        const trie = new PrefixTree<number>()
-            .insert("январь", 1)
-            .insert("января", 1)
-            .insert("янв.", 1);
+        const trie = new PrefixTree<number>().insert('январь', 1).insert('января', 1).insert('янв.', 1);
 
         assert.deepEqual(trie.match('янва'), [1, 1]);
         assert.deepEqual(trie.match('янв'), [1, 1, 1]);
     });
 
     it('supports entries', function () {
-        const trie = new PrefixTree<number>()
-            .insert("янв.", 1)
-            .insert("январь", 2)
-            .insert("января", 3);
-        assert.deepEqual(array(trie.entries()), [["янв.", 1], ["январь", 2], ["января", 3]]);
+        const trie = new PrefixTree<number>().insert('янв.', 1).insert('январь', 2).insert('января', 3);
+        assert.deepEqual(array(trie.entries()), [
+            ['янв.', 1],
+            ['январь', 2],
+            ['января', 3],
+        ]);
     });
 
     it('supports keys', function () {
-        const trie = new PrefixTree<number>()
-            .insert("янв.", 1)
-            .insert("январь", 2)
-            .insert("января", 3);
-        assert.deepEqual(array(trie.keys()), ["янв.", "январь", "января"]);
+        const trie = new PrefixTree<number>().insert('янв.', 1).insert('январь', 2).insert('января', 3);
+        assert.deepEqual(array(trie.keys()), ['янв.', 'январь', 'января']);
     });
 
     it('supports values', function () {
-        const trie = new PrefixTree<number>()
-            .insert("янв.", 1)
-            .insert("январь", 2)
-            .insert("января", 3);
+        const trie = new PrefixTree<number>().insert('янв.', 1).insert('январь', 2).insert('января', 3);
         assert.deepEqual(array(trie.values()), [1, 2, 3]);
     });
 
     it('can get height', function () {
         assert.deepEqual(new PrefixTree<number>().height, 0);
-        assert.deepEqual(new PrefixTree<number>().insert("1", 1).height, 1);
-        assert.deepEqual(new PrefixTree<number>().insert("12", 1).height, 2);
-        assert.deepEqual(new PrefixTree<number>().insert("123", 1).height, 3);
-        assert.deepEqual(new PrefixTree<number>().insert("1234", 1).height, 4);
+        assert.deepEqual(new PrefixTree<number>().insert('1', 1).height, 1);
+        assert.deepEqual(new PrefixTree<number>().insert('12', 1).height, 2);
+        assert.deepEqual(new PrefixTree<number>().insert('123', 1).height, 3);
+        assert.deepEqual(new PrefixTree<number>().insert('1234', 1).height, 4);
     });
 
     it('can search with levenshtein distance', function () {
-        const trie = new PrefixTree()
-            .insert("Hotel A")
-            .insert("Hotel AB")
-            .insert("Some Hotel");
+        const trie = new PrefixTree().insert('Hotel A').insert('Hotel AB').insert('Some Hotel');
 
         const search = 'Hotel C';
-        const [a, b] = trie.search(search, search.length * .75);
+        const [a, b] = trie.search(search, search.length * 0.75);
         assert.deepEqual(a, {value: 'Hotel A', distance: 1});
         assert.deepEqual(b, {value: 'Hotel AB', distance: 2});
     });
 
     it('the default search ignores case and language specific accents', function () {
         // https://github.com/hiddentao/fast-levenshtein/issues/7
-        const trie = new PrefixTree()
-            .insert("Mikhaïlovitch")
-            .insert("Vikhaklovitch");
+        const trie = new PrefixTree().insert('Mikhaïlovitch').insert('Vikhaklovitch');
 
         const search = 'mikailovitch';
         const [a, b] = trie.search(search, 3);
@@ -177,16 +168,13 @@ describe("PrefixTree", function () {
     });
 
     it('the default match also ignores case and language specific accents', function () {
-        const trie = new PrefixTree()
-            .insert("Mikhaïlovitch")
-            .insert("Vikhaklovitch");
+        const trie = new PrefixTree().insert('Mikhaïlovitch').insert('Vikhaklovitch');
 
         assert.deepEqual(trie.match('mikhail'), ['Mikhaïlovitch']);
     });
-
 });
 
-describe("Row", function () {
+describe('Row', function () {
     it('matches the wikipedia example for kitten vs sitting', function () {
         /*
         https://en.wikipedia.org/wiki/Levenshtein_distance
@@ -217,6 +205,4 @@ g	7	7	6	5	4	4	3
         row = row.next('g');
         assert.deepEqual(row.values, [7, 7, 6, 5, 4, 4, 3]);
     });
-
-
 });

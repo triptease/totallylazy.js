@@ -1,5 +1,5 @@
 export function cache(target: any, name: string, descriptor: PropertyDescriptor) {
-    if (typeof descriptor.value != 'function') throw new Error("@cache can only decorate methods");
+    if (typeof descriptor.value != 'function') throw new Error('@cache can only decorate methods');
 
     const cacheMap = new WeakMap<object, Map<string, any>>();
 
@@ -23,7 +23,7 @@ export function cache(target: any, name: string, descriptor: PropertyDescriptor)
             const value = descriptor.value.call(this, ...args);
             cache.set(key, value);
             return value;
-        }
+        },
     });
 }
 

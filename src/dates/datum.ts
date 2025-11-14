@@ -1,14 +1,14 @@
-import {DEFAULT_COMPARATOR, PrefixTree} from "../trie";
-import {Datum, Month, MonthDatum, Weekday} from "./core";
-import {Comparator} from "../collections";
-import {cleanValue} from "./functions";
-import {flatten, unique} from "../arrays";
-import {characters} from "../characters";
-import {get} from "../functions";
-import {array} from "../array";
-import {map, zip} from "../transducers";
-import {lazy} from "../lazy";
-import {caching} from "../cache";
+import {DEFAULT_COMPARATOR, PrefixTree} from '../trie';
+import {Datum, Month, MonthDatum, Weekday} from './core';
+import {Comparator} from '../collections';
+import {cleanValue} from './functions';
+import {flatten, unique} from '../arrays';
+import {characters} from '../characters';
+import {get} from '../functions';
+import {array} from '../array';
+import {map, zip} from '../transducers';
+import {lazy} from '../lazy';
+import {caching} from '../cache';
 
 export type MatchStrategy<V> = (prefixTree: PrefixTree<Datum<V>[]>, value: string) => V | undefined;
 
@@ -22,17 +22,23 @@ export function uniqueMatch<V>(prefixTree: PrefixTree<Datum<V>[]>, value: string
 export class DatumLookup<V> {
     private readonly prefixTree: PrefixTree<Datum<V>[]>;
 
-    constructor(private readonly data: Datum<V>[], comparator: Comparator<string> = DEFAULT_COMPARATOR) {
-        this.prefixTree = this.data.reduce((t, m) => {
-            const data = t.lookup(m.name) || [];
-            data.push(m);
-            return t.insert(m.name, data);
-        }, new PrefixTree<Datum<V>[]>(undefined, comparator));
+    constructor(
+        private readonly data: Datum<V>[],
+        comparator: Comparator<string> = DEFAULT_COMPARATOR
+    ) {
+        this.prefixTree = this.data.reduce(
+            (t, m) => {
+                const data = t.lookup(m.name) || [];
+                data.push(m);
+                return t.insert(m.name, data);
+            },
+            new PrefixTree<Datum<V>[]>(undefined, comparator)
+        );
     }
 
     parse(value: string, strategy: MatchStrategy<V> = uniqueMatch): V {
         const match = strategy(this.prefixTree, value);
-        if (typeof match === "undefined") throw new Error(`${this.constructor.name} - Unable to parse: ${value}`);
+        if (typeof match === 'undefined') throw new Error(`${this.constructor.name} - Unable to parse: ${value}`);
         return match;
     }
 
@@ -60,14 +66,17 @@ export function numberOf(value: string): number {
 export type Numeral = Datum<number>;
 
 export class Numerals extends DatumLookup<number> {
-    constructor(data: Datum<number>[], private locale: string) {
+    constructor(
+        data: Datum<number>[],
+        private locale: string
+    ) {
         super(data);
     }
 
-    static cache: { [key: string]: Numerals } = {};
+    static cache: {[key: string]: Numerals} = {};
 
     static get(locale: string, additionalData: Numeral[] = []): Numerals {
-        return Numerals.cache[locale] = Numerals.cache[locale] || Numerals.create(locale, additionalData);
+        return (Numerals.cache[locale] = Numerals.cache[locale] || Numerals.create(locale, additionalData));
     }
 
     static create(locale: string, additionalData: Numeral[] = []): Numerals {
@@ -75,8 +84,14 @@ export class Numerals extends DatumLookup<number> {
     }
 
     static generateData(locale: string): Numeral[] {
-        const digits = numberFormatter(locale).format(1234567890).replace(/[,. '٬٫]/g, '');
-        return array(characters(digits), zip([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]), map(([c, d]) => ({name: c, value: d})));
+        const digits = numberFormatter(locale)
+            .format(1234567890)
+            .replace(/[,. '٬٫]/g, '');
+        return array(
+            characters(digits),
+            zip([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]),
+            map(([c, d]) => ({name: c, value: d}))
+        );
     }
 
     parse(value: string): number {
@@ -98,7 +113,7 @@ export class Numerals extends DatumLookup<number> {
 export const numberFormatter = caching((locale: string) => new Intl.NumberFormat(locale, {useGrouping: false}));
 
 export class Months extends DatumLookup<Month> {
-    private readonly numerals: Numerals
+    private readonly numerals: Numerals;
 
     constructor(data: MonthDatum[], locale: string) {
         super(data);

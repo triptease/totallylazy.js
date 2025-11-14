@@ -1,23 +1,28 @@
 import {assert, expect} from 'chai';
-import {infer, money, prefer} from "../../src/money";
-import {NumberParser, numberParser} from "../../src/dates/formatting";
+import {infer, money, prefer} from '../../src/money';
+import {NumberParser, numberParser} from '../../src/dates/formatting';
 import {
     flexibleMoneyParser,
     flexibleParse,
     implicitMoneyParser,
-    ImplicitMoneyParserOptions
-} from "../../src/money/flexible-parsing";
+    ImplicitMoneyParserOptions,
+} from '../../src/money/flexible-parsing';
 
 describe('ImplicitMoneyParser', () => {
     it(`handles bad inputs`, function () {
-        expect(() => implicitMoneyParser({currency: 'GBP', locale: 'en'}).parse(undefined as any)).to.throw(/Expected string/);
+        expect(() => implicitMoneyParser({currency: 'GBP', locale: 'en'}).parse(undefined as any)).to.throw(
+            /Expected string/
+        );
         assert.deepEqual(implicitMoneyParser({currency: 'GBP', locale: 'en'}).parseAll(null as any), []);
         assert.deepEqual(implicitMoneyParser({currency: 'GBP', locale: 'en'}).parseAll(0.1 as any), []);
     });
 
     it('can parse and convert a number with a currency provided else where', function () {
         assert.deepEqual(implicitMoneyParser({currency: 'GBP'}).parse('1.23'), {amount: 1.23, currency: 'GBP'});
-        assert.deepEqual(implicitMoneyParser({currency: 'EUR', locale: 'de'}).parse('1,23'), {amount: 1.23, currency: 'EUR'});
+        assert.deepEqual(implicitMoneyParser({currency: 'EUR', locale: 'de'}).parse('1,23'), {
+            amount: 1.23,
+            currency: 'EUR',
+        });
     });
 
     it('can infer decimal place with currencies that are not ambiguous', function () {
@@ -27,12 +32,18 @@ describe('ImplicitMoneyParser', () => {
 
     it('with ambiguous currencies falls back to locale', function () {
         assert.deepEqual(implicitMoneyParser({currency: 'BHD'}).parse('4,567'), {amount: 4567, currency: 'BHD'});
-        assert.deepEqual(implicitMoneyParser({currency: 'BHD', locale:'de'}).parse('4.567'), {amount: 4567, currency: 'BHD'});
+        assert.deepEqual(implicitMoneyParser({currency: 'BHD', locale: 'de'}).parse('4.567'), {
+            amount: 4567,
+            currency: 'BHD',
+        });
     });
 
     it('even works with currency symbols', function () {
         assert.deepEqual(implicitMoneyParser({currency: '£'}).parse('1.23'), {amount: 1.23, currency: 'GBP'});
-        assert.deepEqual(implicitMoneyParser({currency: '$', strategy: prefer('CAD')}).parse('1.23'), {amount: 1.23, currency: 'CAD'});
+        assert.deepEqual(implicitMoneyParser({currency: '$', strategy: prefer('CAD')}).parse('1.23'), {
+            amount: 1.23,
+            currency: 'CAD',
+        });
     });
 
     it('does not blow up on empty currency', function () {
@@ -40,7 +51,6 @@ describe('ImplicitMoneyParser', () => {
         assert.doesNotThrow(() => implicitMoneyParser({} as ImplicitMoneyParserOptions));
     });
 });
-
 
 describe('NumberParser', () => {
     it(`handles bad inputs`, function () {
@@ -92,21 +102,21 @@ describe('NumberParser', () => {
     });
 
     it('throws with inconsistent separators', () => {
-        assert.throws(() => numberParser('.').parse("1,222’333.44"));
-        assert.throws(() => numberParser('.').parse("1.222’333,44"));
-        assert.throws(() => numberParser('.').parse("1.222’333.44"));
+        assert.throws(() => numberParser('.').parse('1,222’333.44'));
+        assert.throws(() => numberParser('.').parse('1.222’333,44'));
+        assert.throws(() => numberParser('.').parse('1.222’333.44'));
     });
 
     it('handles large numbers with multiple group separators', () => {
-        assert.equal(numberParser('.').parse("1,234,568"), 1234568);
+        assert.equal(numberParser('.').parse('1,234,568'), 1234568);
     });
 
     it('can parse arabic numerals', () => {
-        assert.equal(numberParser('٫', 'ar-EG').parse("١٢٬٣٤٥٬٦٧٠٫٨٩"), 12345670.89);
+        assert.equal(numberParser('٫', 'ar-EG').parse('١٢٬٣٤٥٬٦٧٠٫٨٩'), 12345670.89);
     });
 });
 
-describe("Flexible Parsing", function () {
+describe('Flexible Parsing', function () {
     it(`handles bad inputs`, function () {
         expect(() => flexibleMoneyParser('en').parse(undefined as any)).to.throw(/Expected string/);
         assert.deepEqual(flexibleMoneyParser('en').parseAll(null as any), []);
@@ -119,15 +129,21 @@ describe("Flexible Parsing", function () {
     });
 
     it('should infer using locale by default', function () {
-        assert.deepEqual(flexibleMoneyParser('en-ZM', {strategy: infer('en-ZM')}).parseAll('K 2,976'), [money('ZMW', 2976)])
+        assert.deepEqual(flexibleMoneyParser('en-ZM', {strategy: infer('en-ZM')}).parseAll('K 2,976'), [
+            money('ZMW', 2976),
+        ]);
         assert.deepEqual(flexibleMoneyParser('en-ZM').parseAll('K 2,976'), [money('ZMW', 2976)]);
     });
 
     it('examples work', function () {
-        assert.deepEqual(flexibleMoneyParser('en-US', {strategy: prefer('HKD')}).parseAll('$1015 /Night'), [money('HKD', 1015)]);
+        assert.deepEqual(flexibleMoneyParser('en-US', {strategy: prefer('HKD')}).parseAll('$1015 /Night'), [
+            money('HKD', 1015),
+        ]);
         assert.deepEqual(flexibleMoneyParser('en-SG').parseAll('SG$473'), [money('SGD', 473)]);
         assert.deepEqual(flexibleMoneyParser('en-JP').parseAll('￥19,800'), [money('JPY', 19800)]);
-        assert.deepEqual(flexibleMoneyParser('pt-PT', {strategy: prefer('COP')}).parseAll('$ 811.569'), [money('COP', 811569)]);
+        assert.deepEqual(flexibleMoneyParser('pt-PT', {strategy: prefer('COP')}).parseAll('$ 811.569'), [
+            money('COP', 811569),
+        ]);
     });
 
     it('supports another unicode apostrophe for separator', () => {
@@ -140,20 +156,20 @@ describe("Flexible Parsing", function () {
     });
 
     it('correctly parses rupees', () => {
-        assert.deepEqual(flexibleParse('Rs20,825', 'en-IN', { strategy: prefer('INR') }), money('INR', 20825));
+        assert.deepEqual(flexibleParse('Rs20,825', 'en-IN', {strategy: prefer('INR')}), money('INR', 20825));
         assert.deepEqual(flexibleParse('Rs20,825', 'en-IN'), money('INR', 20825));
         assert.deepEqual(flexibleParse('Rs20,825'), money('INR', 20825));
         assert.deepEqual(flexibleParse('Rs20,825', 'en-IN'), money('INR', 20825));
         assert.deepEqual(flexibleParse('₹20,825'), money('INR', 20825));
 
         assert.deepEqual(flexibleParse('Rs20,825', 'en-PK'), money('PKR', 20825));
-        assert.deepEqual(flexibleParse('Rs20,825', 'en', { strategy: prefer('LKR') }), money('LKR', 20825));
+        assert.deepEqual(flexibleParse('Rs20,825', 'en', {strategy: prefer('LKR')}), money('LKR', 20825));
         assert.deepEqual(flexibleParse('රු20,825'), money('LKR', 20825));
         assert.deepEqual(flexibleParse('20,825ரூ'), money('LKR', 20825));
         assert.deepEqual(flexibleParse('Rs20,825', 'en-ID'), money('IDR', 20825));
         assert.deepEqual(flexibleParse('20,825Rp', 'en-ID'), money('IDR', 20825));
         assert.deepEqual(flexibleParse('20,825रु', 'en'), money('NPR', 20825));
-        assert.deepEqual(flexibleParse('₨20,825', 'en', { strategy: prefer('NPR') }), money('NPR', 20825));
+        assert.deepEqual(flexibleParse('₨20,825', 'en', {strategy: prefer('NPR')}), money('NPR', 20825));
         assert.deepEqual(flexibleParse('20,825Re', 'en'), money('NPR', 20825));
     });
 
@@ -167,7 +183,7 @@ describe("Flexible Parsing", function () {
     });
 
     it('can parse arabic numerals, separators and symbols', function () {
-        assert.deepEqual(flexibleMoneyParser('ar-EG').parseAll( '١٢٬٣٤٥٬٦٧٠٫٨٩ ج.م.‏'), [money('EGP', 12345670.89)]);
+        assert.deepEqual(flexibleMoneyParser('ar-EG').parseAll('١٢٬٣٤٥٬٦٧٠٫٨٩ ج.م.‏'), [money('EGP', 12345670.89)]);
     });
 
     it('ignores extra delimiters', function () {
@@ -192,7 +208,9 @@ describe("Flexible Parsing", function () {
     });
 
     it('do not use prefer strategy when explicit currency code is present', function () {
-        assert.deepEqual(flexibleMoneyParser('en', {strategy: prefer('USD')}).parseAll('From $220 CAD'), [money('CAD', 220)]);
+        assert.deepEqual(flexibleMoneyParser('en', {strategy: prefer('USD')}).parseAll('From $220 CAD'), [
+            money('CAD', 220),
+        ]);
     });
 
     it('handles when there is a false match on the currency regex', function () {
@@ -200,7 +218,10 @@ describe("Flexible Parsing", function () {
     });
 
     it('can parse all numbers in a string', function () {
-        assert.deepEqual(flexibleMoneyParser().parseAll('Total USD 1 234,56 Tax USD 234,56'), [money('USD', 1234.56), money('USD', 234.56)]);
+        assert.deepEqual(flexibleMoneyParser().parseAll('Total USD 1 234,56 Tax USD 234,56'), [
+            money('USD', 1234.56),
+            money('USD', 234.56),
+        ]);
     });
 
     it('will not blow up with some invalid inputs but returns any valid', function () {
@@ -278,12 +299,12 @@ describe("Flexible Parsing", function () {
     });
 
     it('throws with invalid decimal separators', () => {
-        assert.throws(() => flexibleParse("USD 12’34"));
+        assert.throws(() => flexibleParse('USD 12’34'));
         assert.throws(() => flexibleParse('USD 12 34'));
     });
 
     it('throws with inconsistent separators decimal separators', () => {
-        assert.throws(() => flexibleParse("USD 1,222’333.44"));
+        assert.throws(() => flexibleParse('USD 1,222’333.44'));
     });
 
     it('throws with ambiguous value when there are 3 digits after a single separator at the end', () => {
@@ -294,7 +315,7 @@ describe("Flexible Parsing", function () {
     });
 
     it('can parse ambiguous value if decimal separator is supplied for a 3 decimal place currency', () => {
-        assert.deepEqual(flexibleParse('BHD 4,567', undefined, {decimalSeparator: ","}), money('BHD', 4.567));
+        assert.deepEqual(flexibleParse('BHD 4,567', undefined, {decimalSeparator: ','}), money('BHD', 4.567));
     });
 
     it('can parse value with no decimal separator if it has multiple group separators', () => {
@@ -312,15 +333,19 @@ describe("Flexible Parsing", function () {
     });
 
     it('does not match any additional money when they adjoin', function () {
-        assert.deepEqual(flexibleMoneyParser().parseAll('You save 11.40 EUR    102.60 EUR'),
-            [money('EUR', 11.4), money('EUR', 102.6)]);
+        assert.deepEqual(flexibleMoneyParser().parseAll('You save 11.40 EUR    102.60 EUR'), [
+            money('EUR', 11.4),
+            money('EUR', 102.6),
+        ]);
 
-        assert.deepEqual(flexibleMoneyParser().parseAll('11.40 EUR 102.60 EUR'),
-            [money('EUR', 11.4), money('EUR', 102.6)]);
+        assert.deepEqual(flexibleMoneyParser().parseAll('11.40 EUR 102.60 EUR'), [
+            money('EUR', 11.4),
+            money('EUR', 102.6),
+        ]);
 
-        assert.deepEqual(flexibleMoneyParser().parseAll('EUR 11.40    EUR 102.60'),
-            [money('EUR', 11.4), money('EUR', 102.6)]);
+        assert.deepEqual(flexibleMoneyParser().parseAll('EUR 11.40    EUR 102.60'), [
+            money('EUR', 11.4),
+            money('EUR', 102.6),
+        ]);
     });
-
-
 });

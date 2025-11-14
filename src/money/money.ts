@@ -1,13 +1,13 @@
-import {different, isNamedMatch, MatchOrNot, NamedMatch, NamedRegExp} from "../characters";
-import {dedupe, filter, first, flatMap, map, single, sort} from "../transducers";
-import {ascending, by, descending} from "../collections";
-import {currencies} from "./currencies";
-import {lazy} from "../lazy";
-import {mappingParser, namedRegexParser, Parser} from "../parsing";
-import {Currencies, Currency} from "./currencies-def";
-import {cache} from "../cache";
-import {get} from "../functions";
-import {array} from "../array";
+import {different, isNamedMatch, MatchOrNot, NamedMatch, NamedRegExp} from '../characters';
+import {dedupe, filter, first, flatMap, map, single, sort} from '../transducers';
+import {ascending, by, descending} from '../collections';
+import {currencies} from './currencies';
+import {lazy} from '../lazy';
+import {mappingParser, namedRegexParser, Parser} from '../parsing';
+import {Currencies, Currency} from './currencies-def';
+import {cache} from '../cache';
+import {get} from '../functions';
+import {array} from '../array';
 import {
     AllowedDecimalSeparators,
     atBoundaryOnly,
@@ -17,10 +17,10 @@ import {
     MatchStrategy,
     numberParser,
     Numerals,
-    Spaces
-} from "../dates";
+    Spaces,
+} from '../dates';
 import NumberFormatPart = Intl.NumberFormatPart;
-import {infer} from "./strategy";
+import {infer} from './strategy';
 
 /**
  *
@@ -41,7 +41,6 @@ import {infer} from "./strategy";
  *
  */
 
-
 export interface Money {
     currency: string;
     amount: number;
@@ -52,7 +51,8 @@ export function money(currency: string, amount: number): Money {
 }
 
 export function moneyFrom(parts: NumberFormatPart[], locale: string, options?: Options): Money {
-    const {currency} = single(parts,
+    const {currency} = single(
+        parts,
         filter(m => m.type === 'currency'),
         flatMap(m => {
             try {
@@ -63,12 +63,13 @@ export function moneyFrom(parts: NumberFormatPart[], locale: string, options?: O
             }
         }),
         sort(by('exactMatch', descending)),
-        first());
+        first()
+    );
     const filtered = parts.filter(p => p.type === 'integer' || p.type === 'decimal' || p.type === 'fraction');
     const decimal = get(() => parts.filter(p => p.type === 'decimal')[0].value, '.');
     const text = filtered.map(p => p.value).join('');
-    const value = numberParser(decimal as AllowedDecimalSeparators, locale).parse(text)
-    return money(currency, value)
+    const value = numberParser(decimal as AllowedDecimalSeparators, locale).parse(text);
+    return money(currency, value);
 }
 
 export type CurrencyDisplay = 'symbol' | 'code';
@@ -86,14 +87,19 @@ export class Formatter {
             currency,
             style: 'currency',
             minimumFractionDigits: 0,
-            maximumFractionDigits: decimalsFor(currency)
+            maximumFractionDigits: decimalsFor(currency),
         });
     }
 }
 
 export const hasNativeToParts = typeof Intl.NumberFormat.prototype.formatToParts == 'function';
 
-export function partsFrom(money: Money, locale: string, currencyDisplay: CurrencyDisplay = 'code', hasNative = hasNativeToParts): NumberFormatPart[] {
+export function partsFrom(
+    money: Money,
+    locale: string,
+    currencyDisplay: CurrencyDisplay = 'code',
+    hasNative = hasNativeToParts
+): NumberFormatPart[] {
     const formatter = Formatter.create(money.currency, locale, currencyDisplay);
     return hasNative ? formatter.formatToParts(money.amount) : toPartsPonyfill(money, locale, currencyDisplay);
 }
@@ -102,7 +108,11 @@ export function format(money: Money, locale: string, currencyDisplay: CurrencyDi
     return Formatter.create(money.currency, locale, currencyDisplay).format(money.amount);
 }
 
-export function toPartsPonyfill(actual: Money, locale: string, currencyDisplay: CurrencyDisplay = 'code'): NumberFormatPart[] {
+export function toPartsPonyfill(
+    actual: Money,
+    locale: string,
+    currencyDisplay: CurrencyDisplay = 'code'
+): NumberFormatPart[] {
     const currency = actual.currency;
     const amount = actual.amount;
     return FormatToParts.create(currency, locale, currencyDisplay).format(amount);
@@ -111,11 +121,12 @@ export function toPartsPonyfill(actual: Money, locale: string, currencyDisplay: 
 const exampleMoney = money('GBP', 111222.3333);
 
 export class FormatToParts {
-    constructor(private currency: string,
-                private currencyDisplay: CurrencyDisplay,
-                private parser: Parser<NumberFormatPart[]>,
-                private locale: string) {
-    }
+    constructor(
+        private currency: string,
+        private currencyDisplay: CurrencyDisplay,
+        private parser: Parser<NumberFormatPart[]>,
+        private locale: string
+    ) {}
 
     @cache
     static create(currency: string, locale: string, currencyDisplay: CurrencyDisplay = 'code'): FormatToParts {
@@ -130,13 +141,11 @@ export class FormatToParts {
         const formatter = Formatter.create(this.currency, this.locale, this.currencyDisplay);
         return this.parser.parse(formatter.format(amount));
     }
-
 }
 
 export function parse(value: string, locale: string, options?: Options): Money {
     return moneyFrom(parseToParts(value, locale, options), locale, options);
 }
-
 
 export function parser(locale: string, options?: Options): Parser<Money> {
     return MoneyParser.create(locale, options);
@@ -169,20 +178,27 @@ export interface Options {
 export type CurrencySymbolDatum = Datum<string>;
 
 export class CurrencySymbols extends DatumLookup<string> {
-    static cache: { [key: string]: CurrencySymbols } = {};
+    static cache: {[key: string]: CurrencySymbols} = {};
 
-    constructor(data: Datum<string>[], private locale:string) {
-        super(data.map(d => {
-            return ({name: cleanValue(d.name), value: d.value});
-        }), ascending);
+    constructor(
+        data: Datum<string>[],
+        private locale: string
+    ) {
+        super(
+            data.map(d => {
+                return {name: cleanValue(d.name), value: d.value};
+            }),
+            ascending
+        );
     }
 
     static get(locale: string, additionalData: CurrencySymbolDatum[] = []): CurrencySymbols {
-        return CurrencySymbols.cache[locale] = CurrencySymbols.cache[locale] || CurrencySymbols.create(locale, additionalData);
+        return (CurrencySymbols.cache[locale] =
+            CurrencySymbols.cache[locale] || CurrencySymbols.create(locale, additionalData));
     }
 
     static set(locale: string, months: CurrencySymbols): CurrencySymbols {
-        return CurrencySymbols.cache[locale] = months;
+        return (CurrencySymbols.cache[locale] = months);
     }
 
     static create(locale: string, additionalData: CurrencySymbolDatum[] = []): CurrencySymbols {
@@ -196,18 +212,23 @@ export class CurrencySymbols extends DatumLookup<string> {
     static generateAdditionalSymbols = ['$', '¥', '£'];
 
     static dataFor(locale: string, iso: string, currency: Currency): CurrencySymbolDatum[] {
-        return [{name: iso, value: iso},
+        return [
+            {name: iso, value: iso},
             {name: symbolFor(locale, iso), value: iso},
-            ...array(currency.symbols, flatMap(s => {
-                const result = [{name: s, value: iso}];
-                if (CurrencySymbols.generateAdditionalSymbols.indexOf(s) !== -1) {
-                    const countyCode = iso.substring(0, 2);
-                    result.push({name: s + countyCode, value: iso});
-                    result.push({name: countyCode + s, value: iso});
-                    result.push({name: iso + s, value: iso});
-                }
-                return result;
-            }))];
+            ...array(
+                currency.symbols,
+                flatMap(s => {
+                    const result = [{name: s, value: iso}];
+                    if (CurrencySymbols.generateAdditionalSymbols.indexOf(s) !== -1) {
+                        const countyCode = iso.substring(0, 2);
+                        result.push({name: s + countyCode, value: iso});
+                        result.push({name: countyCode + s, value: iso});
+                        result.push({name: iso + s, value: iso});
+                    }
+                    return result;
+                })
+            ),
+        ];
     }
 
     parse(value: string, strategy: MatchStrategy<string> = infer(this.locale)): string {
@@ -219,13 +240,13 @@ const gbpSymbol = /GBP|£GB|GB£|UK£|£UK/;
 
 export function symbolFor(locale: string, isoCurrency: string, hasNative = hasNativeToParts): string {
     if (hasNative) {
-        const parts = partsFrom(money(isoCurrency, 0), locale, "symbol");
+        const parts = partsFrom(money(isoCurrency, 0), locale, 'symbol');
         const [currency] = parts.filter(p => p.type === 'currency');
-        if (!currency) throw new Error("No currency found");
+        if (!currency) throw new Error('No currency found');
         return Spaces.remove(currency.value);
     } else {
-        const example = Formatter.create('GBP', locale, "symbol").format(1).replace(gbpSymbol, '@@@');
-        const other = Formatter.create(isoCurrency, locale, "symbol").format(1);
+        const example = Formatter.create('GBP', locale, 'symbol').format(1).replace(gbpSymbol, '@@@');
+        const other = Formatter.create(isoCurrency, locale, 'symbol').format(1);
         const [, result] = different([example, other]);
         if (!result) return '£';
         return Spaces.remove(result);
@@ -234,7 +255,9 @@ export function symbolFor(locale: string, isoCurrency: string, hasNative = hasNa
 
 export class RegexBuilder {
     static buildFromOptions(locale: string, options?: Options): string {
-        return options && options.format ? this.buildFrom(PartsFromFormat.format.parse(options.format), locale, true) : this.buildPattern(locale, options && options.strict || false);
+        return options && options.format
+            ? this.buildFrom(PartsFromFormat.format.parse(options.format), locale, true)
+            : this.buildPattern(locale, (options && options.strict) || false);
     }
 
     static buildPattern(locale: string, strict: boolean = false): string {
@@ -246,20 +269,22 @@ export class RegexBuilder {
         const [group = ''] = raw.filter(p => p.type === 'group').map(p => p.value);
         const numbers = Numerals.get(locale).pattern;
 
-        const pattern = noGroups.map(part => {
-            switch (part.type) {
-                case "currency":
-                    return `(?<currency>${CurrencySymbols.get(locale).pattern})?`;
-                case "decimal":
-                    return `(?<decimal>[${part.value}]?)`;
-                case "fraction":
-                    return `(?<fraction>[${numbers}]*)`;
-                case "integer":
-                    return `(?<integer-group>[${numbers}${Spaces.handle(group)}]*[${numbers}]+)`;
-                default:
-                    return `(?<${part.type}>[${Spaces.handle(part.value)}]?)`;
-            }
-        }).join("");
+        const pattern = noGroups
+            .map(part => {
+                switch (part.type) {
+                    case 'currency':
+                        return `(?<currency>${CurrencySymbols.get(locale).pattern})?`;
+                    case 'decimal':
+                        return `(?<decimal>[${part.value}]?)`;
+                    case 'fraction':
+                        return `(?<fraction>[${numbers}]*)`;
+                    case 'integer':
+                        return `(?<integer-group>[${numbers}${Spaces.handle(group)}]*[${numbers}]+)`;
+                    default:
+                        return `(?<${part.type}>[${Spaces.handle(part.value)}]?)`;
+                }
+            })
+            .join('');
         return atBoundaryOnly(pattern);
     }
 
@@ -268,18 +293,22 @@ export class RegexBuilder {
         if (!strict) {
             const first = parts[0];
             const last = parts[parts.length - 1];
-            const literal: NumberFormatPart = {type: "literal", value: ' '};
+            const literal: NumberFormatPart = {type: 'literal', value: ' '};
 
-            if (first.type === "currency") {
+            if (first.type === 'currency') {
                 parts.push(literal, first);
-                parts.splice(1, 0, literal)
-            } else if (last.type === "currency") {
+                parts.splice(1, 0, literal);
+            } else if (last.type === 'currency') {
                 parts.unshift(last, literal);
-                parts.splice(parts.length - 2, 0, literal)
+                parts.splice(parts.length - 2, 0, literal);
             }
         }
 
-        return array(parts, filter(p => p.type !== 'group'), dedupe(by('type')));
+        return array(
+            parts,
+            filter(p => p.type !== 'group'),
+            dedupe(by('type'))
+        );
     }
 }
 
@@ -291,85 +320,108 @@ export class MoneyParser {
 
 export class NumberFormatPartParser {
     static create(locale: string, pattern?: string): Parser<NumberFormatPart[]>;
-    static create(locale: string, options?: Options): Parser<NumberFormatPart[]>
+    static create(locale: string, options?: Options): Parser<NumberFormatPart[]>;
     @cache
     static create(locale: string, patternOrOption?: string | Options): Parser<NumberFormatPart[]> {
-        const pattern = typeof patternOrOption === "string" ? patternOrOption : RegexBuilder.buildFromOptions(locale, patternOrOption);
+        const pattern =
+            typeof patternOrOption === 'string'
+                ? patternOrOption
+                : RegexBuilder.buildFromOptions(locale, patternOrOption);
         return mappingParser(namedRegexParser(NamedRegExp.create(pattern)), m => this.convert(m, locale));
     }
 
-    static convert(matches: NamedMatch[], locale:string) {
-        return array(matches, filter(m => Boolean(m.value)), flatMap((m: NamedMatch) => {
-            if (m.name === 'integer-group') {
-                return IntegerGroupParser.digits(locale).parse(m.value);
-            } else {
-                return [{type: m.name, value: m.value} as NumberFormatPart];
-            }
-        }));
+    static convert(matches: NamedMatch[], locale: string) {
+        return array(
+            matches,
+            filter(m => Boolean(m.value)),
+            flatMap((m: NamedMatch) => {
+                if (m.name === 'integer-group') {
+                    return IntegerGroupParser.digits(locale).parse(m.value);
+                } else {
+                    return [{type: m.name, value: m.value} as NumberFormatPart];
+                }
+            })
+        );
     }
 }
 
 export class PartsFromFormat {
-    private constructor(private formatRegex: NamedRegExp, private integerGroupParser: IntegerGroupParser) {
-    }
+    private constructor(
+        private formatRegex: NamedRegExp,
+        private integerGroupParser: IntegerGroupParser
+    ) {}
 
     parse(format: string): NumberFormatPart[] {
-        return array(this.formatRegex.iterate(format), flatMap((matchOrNot: MatchOrNot) => {
-            if (isNamedMatch(matchOrNot)) {
-                const [integerGroupOrCurrency, decimal, fractions]: NamedMatch[] = matchOrNot.filter(m => Boolean(m.value));
-                if (integerGroupOrCurrency.name === 'currency') {
-                    return [{
-                        type: integerGroupOrCurrency.name,
-                        value: integerGroupOrCurrency.value
-                    }] as NumberFormatPart[];
-                } else {
-                    const integerAndGroups = this.integerGroupParser.parse(integerGroupOrCurrency.value);
-                    if (decimal) {
-                        return [...integerAndGroups,
-                            {type: decimal.name, value: decimal.value},
-                            {type: fractions.name, value: fractions.value}] as NumberFormatPart[];
+        return array(
+            this.formatRegex.iterate(format),
+            flatMap((matchOrNot: MatchOrNot) => {
+                if (isNamedMatch(matchOrNot)) {
+                    const [integerGroupOrCurrency, decimal, fractions]: NamedMatch[] = matchOrNot.filter(m =>
+                        Boolean(m.value)
+                    );
+                    if (integerGroupOrCurrency.name === 'currency') {
+                        return [
+                            {
+                                type: integerGroupOrCurrency.name,
+                                value: integerGroupOrCurrency.value,
+                            },
+                        ] as NumberFormatPart[];
                     } else {
-                        return integerAndGroups;
+                        const integerAndGroups = this.integerGroupParser.parse(integerGroupOrCurrency.value);
+                        if (decimal) {
+                            return [
+                                ...integerAndGroups,
+                                {type: decimal.name, value: decimal.value},
+                                {type: fractions.name, value: fractions.value},
+                            ] as NumberFormatPart[];
+                        } else {
+                            return integerAndGroups;
+                        }
                     }
+                } else {
+                    return [{type: 'literal', value: matchOrNot}];
                 }
-            } else {
-                return [{type: "literal", value: matchOrNot}];
-            }
-        }));
+            })
+        );
     }
-
 
     @lazy
     static get format(): PartsFromFormat {
-        const regex = NamedRegExp.create('(?:(?<integer-group>(?:i.*i|i))(?:(?<decimal>[^f])(?<fraction>f+))?|(?<currency>C+))');
+        const regex = NamedRegExp.create(
+            '(?:(?<integer-group>(?:i.*i|i))(?:(?<decimal>[^f])(?<fraction>f+))?|(?<currency>C+))'
+        );
         return new PartsFromFormat(regex, IntegerGroupParser.integerFormat);
     }
 
     @cache
     static examplePattern(locale: string): PartsFromFormat {
         const numerals = Numerals.get(locale);
-        const regex = NamedRegExp.create(`(?:(?<integer-group>${numerals.format(1)}.*${numerals.format(2)})(?:(?<decimal>.)(?<fraction>${numerals.format(3)}+))?|(?<currency>${CurrencySymbols.get(locale).pattern}))`);
+        const regex = NamedRegExp.create(
+            `(?:(?<integer-group>${numerals.format(1)}.*${numerals.format(2)})(?:(?<decimal>.)(?<fraction>${numerals.format(3)}+))?|(?<currency>${CurrencySymbols.get(locale).pattern}))`
+        );
         return new PartsFromFormat(regex, IntegerGroupParser.digits(locale));
     }
 }
 
 export class IntegerGroupParser {
-    private constructor(private regex: NamedRegExp) {
-    }
+    private constructor(private regex: NamedRegExp) {}
 
     parse(value: string): NumberFormatPart[] {
-        return array(this.regex.iterate(value), map(m => {
-            if (isNamedMatch(m)) {
-                return {type: 'integer', value: m[0].value} as NumberFormatPart;
-            } else {
-                return {type: 'group', value: m} as NumberFormatPart;
-            }
-        }));
+        return array(
+            this.regex.iterate(value),
+            map(m => {
+                if (isNamedMatch(m)) {
+                    return {type: 'integer', value: m[0].value} as NumberFormatPart;
+                } else {
+                    return {type: 'group', value: m} as NumberFormatPart;
+                }
+            })
+        );
     }
 
     @cache
-    static digits(locale:string): IntegerGroupParser {
-        return new IntegerGroupParser(NamedRegExp.create(`(?<integer>[${(Numerals.get(locale).pattern)}]+)`));
+    static digits(locale: string): IntegerGroupParser {
+        return new IntegerGroupParser(NamedRegExp.create(`(?<integer>[${Numerals.get(locale).pattern}]+)`));
     }
 
     @lazy

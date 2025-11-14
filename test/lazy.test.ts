@@ -1,5 +1,5 @@
-import { assert } from 'chai';
-import {lazy} from "../src/lazy";
+import {assert} from 'chai';
+import {lazy} from '../src/lazy';
 
 describe('lazy', () => {
     it('laziness is per instance not per class', () => {
