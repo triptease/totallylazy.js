@@ -9,4 +9,3 @@ export function cleanValue(value: string): string {
 export function atBoundaryOnly(pattern: string): string {
     return `(?:^|\\s)${pattern}(?=[\\s${boundaryDelimiters}]|$)`;
 }
-

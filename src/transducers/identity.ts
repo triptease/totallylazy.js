@@ -1,4 +1,4 @@
-import {Transducer} from "./transducer";
+import {Transducer} from './transducer';
 
 export class IdentityTransducer<A> implements Transducer<A, A> {
     async_(iterable: AsyncIterable<A>): AsyncIterable<A> {
@@ -11,7 +11,7 @@ export class IdentityTransducer<A> implements Transducer<A, A> {
 }
 
 export function identity<A>(): IdentityTransducer<A> {
-    return new IdentityTransducer()
+    return new IdentityTransducer();
 }
 
 // alias

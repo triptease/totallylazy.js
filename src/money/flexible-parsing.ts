@@ -1,37 +1,42 @@
-import {CurrencySymbols, decimalsFor, money, Money} from "./money";
+import {CurrencySymbols, decimalsFor, money, Money} from './money';
+import {FailParser, Parser, RuntimeSafeParser} from '../parsing';
+import {NamedMatch, NamedRegExp, removeUnicodeMarkers} from '../characters';
+import {filter, find, first, flatMap, single, sort} from '../transducers';
+import {by, descending} from '../collections';
+import {unique} from '../arrays';
+import {cache} from '../cache';
+import {lazy} from '../lazy';
+import {get} from '../functions';
+import {array} from '../array';
 import {
-    FailParser, Parser, RuntimeSafeParser
-} from "../parsing";
-import {NamedMatch, NamedRegExp, removeUnicodeMarkers} from "../characters";
-import {filter, find, first, flatMap, single, sort} from "../transducers";
-import {by, descending} from "../collections";
-import {unique} from "../arrays";
-import {cache} from "../cache";
-import {lazy} from "../lazy";
-import {get} from "../functions";
-import {array} from "../array";
-import {
-    AllowedDecimalSeparators, atBoundaryOnly,
-    decimalSeparator, inferDecimalSeparator, mapIgnoreError, MatchStrategy,
+    AllowedDecimalSeparators,
+    atBoundaryOnly,
+    decimalSeparator,
+    inferDecimalSeparator,
+    mapIgnoreError,
+    MatchStrategy,
     NumberParser,
-    numberParser, numberPattern,
-    separatorsOf, Spaces
-} from "../dates";
-import {infer} from "./strategy";
+    numberParser,
+    numberPattern,
+    separatorsOf,
+    Spaces,
+} from '../dates';
+import {infer} from './strategy';
 
 export interface Options {
     strategy?: MatchStrategy<string>;
-    decimalSeparator?: AllowedDecimalSeparators
+    decimalSeparator?: AllowedDecimalSeparators;
 }
 
 export function flexibleParse(value: string, locale: string = 'en', options?: Options): Money {
-    return new FlexibleMoneyParser(locale, options).parse(value)
+    return new FlexibleMoneyParser(locale, options).parse(value);
 }
 
-
 export class FlexibleMoneyParser implements Parser<Money> {
-    constructor(private locale: string, private options?: Options) {
-    }
+    constructor(
+        private locale: string,
+        private options?: Options
+    ) {}
 
     @lazy
     private get pattern(): NamedRegExp {
@@ -40,7 +45,11 @@ export class FlexibleMoneyParser implements Parser<Money> {
 
     @cache
     private static patternFor(locale: string): NamedRegExp {
-        return NamedRegExp.create(atBoundaryOnly(`(?<currency>${CurrencySymbols.get(locale).pattern})?(?<literal>[${Spaces.spaces}])?(?<number>${numberPattern(locale)})(?<literal>[${Spaces.spaces}])?(?<currency>${CurrencySymbols.get(locale).pattern})?`));
+        return NamedRegExp.create(
+            atBoundaryOnly(
+                `(?<currency>${CurrencySymbols.get(locale).pattern})?(?<literal>[${Spaces.spaces}])?(?<number>${numberPattern(locale)})(?<literal>[${Spaces.spaces}])?(?<currency>${CurrencySymbols.get(locale).pattern})?`
+            )
+        );
     }
 
     parse(value: string): Money {
@@ -52,24 +61,38 @@ export class FlexibleMoneyParser implements Parser<Money> {
     }
 
     parseAll(value: string): Money[] {
-        return array(this.pattern.exec(removeUnicodeMarkers(value)), mapIgnoreError(match => this.parseSingle(match)));
+        return array(
+            this.pattern.exec(removeUnicodeMarkers(value)),
+            mapIgnoreError(match => this.parseSingle(match))
+        );
     }
 
     private parseSingle(result: NamedMatch[]) {
-        const {currency} = single(result,
+        const {currency} = single(
+            result,
             filter(m => m.name === 'currency' && m.value !== undefined),
             flatMap(m => {
                 try {
-                    const currency = CurrencySymbols.get(this.locale).parse(m.value, (this.options && this.options.strategy) || infer(this.locale));
+                    const currency = CurrencySymbols.get(this.locale).parse(
+                        m.value,
+                        (this.options && this.options.strategy) || infer(this.locale)
+                    );
                     return [{currency, exactMatch: currency === m.value}];
                 } catch (e) {
                     return [];
                 }
             }),
             sort(by('exactMatch', descending)),
-            first());
-        const amount = single(result, find(m => m.name === 'number' && m.value !== undefined)).value;
-        const instance = numberParser((this.options && this.options.decimalSeparator) || findDecimalSeparator(currency, amount), this.locale);
+            first()
+        );
+        const amount = single(
+            result,
+            find(m => m.name === 'number' && m.value !== undefined)
+        ).value;
+        const instance = numberParser(
+            (this.options && this.options.decimalSeparator) || findDecimalSeparator(currency, amount),
+            this.locale
+        );
         return money(currency, instance.parse(amount));
     }
 }
@@ -78,9 +101,8 @@ export function flexibleMoneyParser(locale: string = 'en', options?: Options) {
     return new RuntimeSafeParser(new FlexibleMoneyParser(locale, options));
 }
 
-
 function flip(value: string): AllowedDecimalSeparators {
-    return value === "." ? "," : ".";
+    return value === '.' ? ',' : '.';
 }
 
 export function findDecimalSeparator(isoCurrency: string, amount: string): AllowedDecimalSeparators {
@@ -113,10 +135,14 @@ export interface ImplicitMoneyParserOptions {
 }
 
 class ImplicitMoneyParser implements Parser<Money> {
-    constructor(private currency: string,
-                locale: string,
-                private parser = new NumberParser(amount => get(() => findDecimalSeparator(currency, amount), inferDecimalSeparator(locale)), locale)) {
-    }
+    constructor(
+        private currency: string,
+        locale: string,
+        private parser = new NumberParser(
+            amount => get(() => findDecimalSeparator(currency, amount), inferDecimalSeparator(locale)),
+            locale
+        )
+    ) {}
 
     parse(value: string): Money {
         const amount = this.parser.parse(value);
@@ -128,7 +154,13 @@ class ImplicitMoneyParser implements Parser<Money> {
     }
 }
 
-export function implicitMoneyParser({currency, locale = 'en', strategy = infer(locale)}: ImplicitMoneyParserOptions): Parser<Money> {
-    if(!currency) return new FailParser();
-    return new RuntimeSafeParser(new ImplicitMoneyParser(CurrencySymbols.get(locale).parse(currency, strategy), locale));
+export function implicitMoneyParser({
+    currency,
+    locale = 'en',
+    strategy = infer(locale),
+}: ImplicitMoneyParserOptions): Parser<Money> {
+    if (!currency) return new FailParser();
+    return new RuntimeSafeParser(
+        new ImplicitMoneyParser(CurrencySymbols.get(locale).parse(currency, strategy), locale)
+    );
 }

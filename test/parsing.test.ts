@@ -1,9 +1,9 @@
 import {assert} from 'chai';
-import {characters} from "../src/characters";
-import {sequence} from "../src/sequence";
-import {zip} from "../src/transducers/zip";
-import {CachingParser, Parser} from "../src/parsing";
-import {Numerals} from "../src/dates/datum";
+import {characters} from '../src/characters';
+import {sequence} from '../src/sequence';
+import {zip} from '../src/transducers/zip';
+import {CachingParser, Parser} from '../src/parsing';
+import {Numerals} from '../src/dates/datum';
 
 describe('CachingParser', () => {
     it('only calls the underlying parser once per value', () => {
@@ -41,12 +41,11 @@ describe('Numerals', () => {
             assert.equal(Numerals.get(locale).parse(number.toString()), number);
         }
     });
-})
-
+});
 
 describe('digits', () => {
     it('works', function () {
-        assert.equal(Numerals.get('fr').pattern, '\\d')
-        assert.equal(Numerals.get('ar-EG').pattern, '\\d٠١٢٣٤٥٦٧٨٩')
+        assert.equal(Numerals.get('fr').pattern, '\\d');
+        assert.equal(Numerals.get('ar-EG').pattern, '\\d٠١٢٣٤٥٦٧٨٩');
     });
-})
+});

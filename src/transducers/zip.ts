@@ -1,13 +1,12 @@
-import {isAsyncIterable, isIterable} from "../collections";
-import {range} from "../sequence";
-import {Transducer} from "./transducer";
+import {isAsyncIterable, isIterable} from '../collections';
+import {range} from '../sequence';
+import {Transducer} from './transducer';
 
 export class ZipTransducer<A, B> implements Transducer<A, [A, B]> {
-    constructor(public other: Iterable<B> | AsyncIterable<B>) {
-    }
+    constructor(public other: Iterable<B> | AsyncIterable<B>) {}
 
-    async* async_(iterable: AsyncIterable<A>): AsyncIterable<[A, B]> {
-        if (!isAsyncIterable(this.other)) throw new Error("Unsupported operation exception");
+    async *async_(iterable: AsyncIterable<A>): AsyncIterable<[A, B]> {
+        if (!isAsyncIterable(this.other)) throw new Error('Unsupported operation exception');
         const iteratorA = iterable[Symbol.asyncIterator]();
         const iteratorB = this.other[Symbol.asyncIterator]();
         while (true) {
@@ -17,12 +16,13 @@ export class ZipTransducer<A, B> implements Transducer<A, [A, B]> {
         }
     }
 
-    * sync(iterable: Iterable<A>): Iterable<[A, B]> {
-        if (!isIterable(this.other)) throw new Error("Unsupported operation exception");
+    *sync(iterable: Iterable<A>): Iterable<[A, B]> {
+        if (!isIterable(this.other)) throw new Error('Unsupported operation exception');
         const iteratorA = iterable[Symbol.iterator]();
         const iteratorB = this.other[Symbol.iterator]();
         while (true) {
-            const resultA = iteratorA.next(), resultB = iteratorB.next();
+            const resultA = iteratorA.next(),
+                resultB = iteratorB.next();
             if (resultA.done || resultB.done) return;
             yield [resultA.value, resultB.value];
         }

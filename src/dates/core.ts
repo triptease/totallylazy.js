@@ -19,7 +19,6 @@ export function date(year: number, month?: number, day?: number): Date {
 export type MonthFormat = 'numeric' | '2-digit' | 'short' | 'long';
 export type WeekdayFormat = 'short' | 'long';
 
-
 /**
  * Format:
  *  Year
@@ -56,7 +55,7 @@ export interface PatternParser<V> {
 }
 
 export interface ParserBuilder<V> {
-    build(locale:string): PatternParser<V>;
+    build(locale: string): PatternParser<V>;
     namesFor(locale: string, options: Options): string[];
 }
 
@@ -69,7 +68,7 @@ export type MonthDatum = Datum<Month>;
 export type WeekdayDatum = Datum<Weekday>;
 
 export interface LocalisedData<V extends Datum<any>> {
-    [locale: string] : V[];
+    [locale: string]: V[];
 }
 
 export interface Dependencies {
@@ -89,10 +88,10 @@ export interface Options extends Dependencies {
 }
 
 export const defaultOptions: Options = {
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-    weekday: 'long'
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    weekday: 'long',
 };
 
 /**
@@ -105,7 +104,7 @@ export enum Weekday {
     Thursday,
     Friday,
     Saturday,
-    Sunday
+    Sunday,
 }
 
 export function weekdayOf(date: Date): Weekday {
@@ -129,9 +128,8 @@ export enum Month {
     September,
     October,
     November,
-    December
+    December,
 }
-
 
 export function monthOf(date: Date): Month {
     return date.getUTCMonth() + 1;
@@ -168,4 +166,3 @@ export class Days {
         return Math.abs((a.getTime() - b.getTime()) / Days.milliseconds);
     }
 }
-

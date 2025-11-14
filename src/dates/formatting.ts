@@ -1,17 +1,17 @@
-import {lazy} from "../lazy";
-import {characters, NamedMatch, NamedRegExp} from "../characters";
-import {flatMap, map} from "../transducers";
-import {cache, caching} from "../cache";
-import {array} from "../array";
-import {date, DateFactory, DateFactoryParts, defaultOptions, Format, Options} from "./core";
-import {unique} from "../arrays";
-import {get} from "../functions";
-import {extraDelimiters, mappingParser, namedRegexParser, or, Parser, preProcess, RuntimeSafeParser} from "../parsing";
-import {Mapper} from "../collections";
-import {formatData, optionsFrom, partsFrom} from "./format";
-import {atBoundaryOnly, boundaryDelimiters} from "./functions";
-import {numberOf, Numerals} from "./datum";
-import {MonthsBuilder, WeekdaysBuilder} from "./builders";
+import {lazy} from '../lazy';
+import {characters, NamedMatch, NamedRegExp} from '../characters';
+import {flatMap, map} from '../transducers';
+import {cache, caching} from '../cache';
+import {array} from '../array';
+import {date, DateFactory, DateFactoryParts, defaultOptions, Format, Options} from './core';
+import {unique} from '../arrays';
+import {get} from '../functions';
+import {extraDelimiters, mappingParser, namedRegexParser, or, Parser, preProcess, RuntimeSafeParser} from '../parsing';
+import {Mapper} from '../collections';
+import {formatData, optionsFrom, partsFrom} from './format';
+import {atBoundaryOnly, boundaryDelimiters} from './functions';
+import {numberOf, Numerals} from './datum';
+import {MonthsBuilder, WeekdaysBuilder} from './builders';
 import DateTimeFormatPart = Intl.DateTimeFormatPart;
 import DateTimeFormatPartTypes = Intl.DateTimeFormatPartTypes;
 
@@ -39,7 +39,7 @@ export const numberPattern = caching((locale: string) => {
 export function mapIgnoreError<A, B>(mapper: Mapper<A, B>) {
     return flatMap((value: A) => {
         try {
-            return [mapper(value)]
+            return [mapper(value)];
         } catch (e) {
             return [];
         }
@@ -49,13 +49,16 @@ export function mapIgnoreError<A, B>(mapper: Mapper<A, B>) {
 const separatorsPattern = NamedRegExp.create(`(?<separator>[${allowedSeparators}])`);
 
 export function separatorsOf(amount: string): string[] {
-    return array(separatorsPattern.exec(amount), map(([match]) => match.value));
+    return array(
+        separatorsPattern.exec(amount),
+        map(([match]) => match.value)
+    );
 }
 
 export type AllowedDecimalSeparators = '.' | ',' | '٫';
 
 export function isDecimalSeparator(value: any): value is AllowedDecimalSeparators {
-    return value && typeof value === "string" && value === '.' || value === ',' || value === '٫';
+    return (value && typeof value === 'string' && value === '.') || value === ',' || value === '٫';
 }
 
 export function decimalSeparator(value: any): AllowedDecimalSeparators {
@@ -67,7 +70,10 @@ export class NumberParser implements Parser<number> {
     readonly strictNumberPattern: RegExp;
     readonly globalNumberPattern: NamedRegExp;
 
-    constructor(private decimalSeparator: (amount: string) => AllowedDecimalSeparators, private locale: string) {
+    constructor(
+        private decimalSeparator: (amount: string) => AllowedDecimalSeparators,
+        private locale: string
+    ) {
         this.strictNumberPattern = new RegExp(`^${numberPattern(locale)}$`);
         this.globalNumberPattern = NamedRegExp.create(`(?<number>${numberPattern(locale)})`, 'g');
     }
@@ -78,14 +84,18 @@ export class NumberParser implements Parser<number> {
     }
 
     parseAll(value: string): number[] {
-        return array(this.globalNumberPattern.exec(value), mapIgnoreError(([match]) => this.parseSingle(match.value.trim())));
+        return array(
+            this.globalNumberPattern.exec(value),
+            mapIgnoreError(([match]) => this.parseSingle(match.value.trim()))
+        );
     }
 
     private parseSingle(value: string, decimalSeparator = this.decimalSeparator(value)): number {
         const separators = separatorsOf(value);
         if (separators.length === 0) return this.numberOf(value, decimalSeparator);
         const lastSeparator = separators[separators.length - 1];
-        const groupSeparators = lastSeparator === decimalSeparator ? separators.slice(0, separators.length - 1) : separators;
+        const groupSeparators =
+            lastSeparator === decimalSeparator ? separators.slice(0, separators.length - 1) : separators;
         if (groupSeparators.indexOf(decimalSeparator) !== -1) throw new Error(`Unable to parse '${value}'`);
         if (unique(groupSeparators).length > 1) throw new Error(`Unable to parse '${value}'`);
 
@@ -94,13 +104,15 @@ export class NumberParser implements Parser<number> {
 
     private convert(value: string, decimalSeparator: AllowedDecimalSeparators): string {
         const numerals = Numerals.get(this.locale);
-        return characters(value).map(c => {
-            if (c === decimalSeparator) return '.';
-            if (c === '-') return '-';
-            const number = get(() => numerals.parse(c));
-            if (isNaN(number)) return '';
-            return number.toString();
-        }).join('');
+        return characters(value)
+            .map(c => {
+                if (c === decimalSeparator) return '.';
+                if (c === '-') return '-';
+                const number = get(() => numerals.parse(c));
+                if (isNaN(number)) return '';
+                return number.toString();
+            })
+            .join('');
     }
 
     private numberOf(value: string, decimalSeparator: AllowedDecimalSeparators) {
@@ -118,21 +130,29 @@ export type Locale = string;
 export function numberParser(): Parser<number>;
 export function numberParser(decimalSeparatorOrLocale: AllowedDecimalSeparators | Locale): Parser<number>;
 export function numberParser(decimalSeparator: AllowedDecimalSeparators, locale: Locale): Parser<number>;
-export function numberParser(decimalSeparatorOrLocale?: AllowedDecimalSeparators | Locale, locale: Locale = 'en'): Parser<number> {
+export function numberParser(
+    decimalSeparatorOrLocale?: AllowedDecimalSeparators | Locale,
+    locale: Locale = 'en'
+): Parser<number> {
     if (!decimalSeparatorOrLocale) return numberParser(locale);
-    if (isDecimalSeparator(decimalSeparatorOrLocale)) return new RuntimeSafeParser(new NumberParser(ignore => decimalSeparatorOrLocale, locale));
+    if (isDecimalSeparator(decimalSeparatorOrLocale))
+        return new RuntimeSafeParser(new NumberParser(ignore => decimalSeparatorOrLocale, locale));
     return numberParser(inferDecimalSeparator(decimalSeparatorOrLocale), decimalSeparatorOrLocale);
 }
 
 export const inferDecimalSeparator = caching((locale: string) =>
-    get(() => decimalSeparator(new Intl.NumberFormat(locale).
-    formatToParts(.1).find(e => e.type === 'decimal')!.value), '.'));
+    get(
+        () => decimalSeparator(new Intl.NumberFormat(locale).formatToParts(0.1).find(e => e.type === 'decimal')!.value),
+        '.'
+    )
+);
 
 export class RegexBuilder {
-    constructor(private locale: string,
-                private options: Options = defaultOptions,
-                private formatted: DateTimeFormatPart[]) {
-    }
+    constructor(
+        private locale: string,
+        private options: Options = defaultOptions,
+        private formatted: DateTimeFormatPart[]
+    ) {}
 
     @cache
     static create(locale: string, options: string | Options = defaultOptions): RegexBuilder {
@@ -143,24 +163,28 @@ export class RegexBuilder {
     }
 
     @lazy get pattern() {
-        const pattern = this.formatted.map((part, index) => {
-            switch (part.type) {
-                case "year":
-                    return `(?<year>[${(Numerals.get(this.locale).pattern)}]{${this.lengthOf(part.value)}})`;
-                case "month":
-                    return `(?<month>${this.monthsPattern()})`;
-                case "day":
-                    return `(?<day>[${(Numerals.get(this.locale).pattern)}]{1,2})`;
-                case "weekday":
-                    return `(?<weekday>${WeekdaysBuilder.create(this.options).build(this.locale).pattern.toLocaleLowerCase(this.locale)})`;
-                default: {
-                    const chars = unique(characters(escapeCharacters(this.addExtraLiterals(part)))).join('').replace(' ', '\\s');
-                    const isLast = index === this.formatted.length - 1;
-                    const quantifier = isLast ? '*' : '+';
-                    return `[${chars}]${quantifier}?`;
+        const pattern = this.formatted
+            .map((part, index) => {
+                switch (part.type) {
+                    case 'year':
+                        return `(?<year>[${Numerals.get(this.locale).pattern}]{${this.lengthOf(part.value)}})`;
+                    case 'month':
+                        return `(?<month>${this.monthsPattern()})`;
+                    case 'day':
+                        return `(?<day>[${Numerals.get(this.locale).pattern}]{1,2})`;
+                    case 'weekday':
+                        return `(?<weekday>${WeekdaysBuilder.create(this.options).build(this.locale).pattern.toLocaleLowerCase(this.locale)})`;
+                    default: {
+                        const chars = unique(characters(escapeCharacters(this.addExtraLiterals(part))))
+                            .join('')
+                            .replace(' ', '\\s');
+                        const isLast = index === this.formatted.length - 1;
+                        const quantifier = isLast ? '*' : '+';
+                        return `[${chars}]${quantifier}?`;
+                    }
                 }
-            }
-        }).join("");
+            })
+            .join('');
         return atBoundaryOnly(pattern);
     }
 
@@ -173,14 +197,16 @@ export class RegexBuilder {
     private addExtraLiterals(part: DateTimeFormatPart) {
         if (this.options.strict) return part.value;
         if (this.options.format) return part.value + (this.options.separators || boundaryDelimiters);
-        return part.value + (this.options.separators || (boundaryDelimiters + extraDelimiters));
+        return part.value + (this.options.separators || boundaryDelimiters + extraDelimiters);
     }
 
     private monthsPattern(): string {
-        const numericPattern = `[${(Numerals.get(this.locale).pattern)}]{1,2}`;
-        const textPattern = MonthsBuilder.create(this.options).build(this.locale).pattern.toLocaleLowerCase(this.locale);
-        if (this.options.month === "2-digit" || this.options.month === "numeric") return numericPattern;
-        if (this.options.month === "short" || this.options.month === "long") return textPattern;
+        const numericPattern = `[${Numerals.get(this.locale).pattern}]{1,2}`;
+        const textPattern = MonthsBuilder.create(this.options)
+            .build(this.locale)
+            .pattern.toLocaleLowerCase(this.locale);
+        if (this.options.month === '2-digit' || this.options.month === 'numeric') return numericPattern;
+        if (this.options.month === 'short' || this.options.month === 'long') return textPattern;
         return `(?:${numericPattern}|${textPattern})`;
     }
 }
@@ -193,21 +219,25 @@ export class DateParser {
     @cache
     static create(locale: string, options: Options) {
         const pattern = RegexBuilder.create(locale, options).pattern;
-        return mappingParser(DateTimeFormatPartParser.create(NamedRegExp.create(pattern), locale),
-            p => dateFrom(p, locale, options));
+        return mappingParser(DateTimeFormatPartParser.create(NamedRegExp.create(pattern), locale), p =>
+            dateFrom(p, locale, options)
+        );
     }
 }
 
 export class DateTimeFormatPartParser {
     @cache
     static create(regex: NamedRegExp, locale: string): Parser<DateTimeFormatPart[]> {
-        return preProcess(mappingParser(namedRegexParser(regex), m => this.convert(m, locale)), value => this.preProcess(value, locale));
+        return preProcess(
+            mappingParser(namedRegexParser(regex), m => this.convert(m, locale)),
+            value => this.preProcess(value, locale)
+        );
     }
 
     static convert(matches: NamedMatch[], locale: string): DateTimeFormatPart[] {
-        return matches.map((m) => ({
+        return matches.map(m => ({
             type: m.name as DateTimeFormatPartTypes,
-            value: m.value.toLocaleUpperCase(locale)
+            value: m.value.toLocaleUpperCase(locale),
         }));
     }
 
@@ -216,51 +246,53 @@ export class DateTimeFormatPartParser {
     }
 }
 
-export function dateFrom(parts: DateTimeFormatPart[],
-                         locale: string,
-                         options: Options): Date {
+export function dateFrom(parts: DateTimeFormatPart[], locale: string, options: Options): Date {
     const parser = numberParser('.', locale);
     const dayText = parts.find(p => p.type === 'day');
-    if (!dayText) throw new Error("No day found");
+    if (!dayText) throw new Error('No day found');
     const day = parser.parse(dayText.value);
 
     const monthText = parts.find(p => p.type === 'month');
-    if (!monthText) throw new Error("No month found");
+    if (!monthText) throw new Error('No month found');
     const month = MonthsBuilder.create(options).build(locale).parse(monthText.value);
 
     const yearText = parts.find(p => p.type === 'year');
     const year = yearText ? parser.parse(yearText.value) : undefined;
 
     const weekdayText = parts.find(p => p.type === 'weekday');
-    const weekday = weekdayText ? get(() => WeekdaysBuilder.create(options).build(locale).parse(weekdayText.value)) : undefined;
+    const weekday = weekdayText
+        ? get(() => WeekdaysBuilder.create(options).build(locale).parse(weekdayText.value))
+        : undefined;
 
     return (options.factory ?? new DefaultDateFactory()).create({year, month, day, weekday});
 }
 
 export class DefaultDateFactory implements DateFactory {
     create({year, month, day}: DateFactoryParts): Date {
-        if (typeof year === "undefined") throw new Error("No year found");
+        if (typeof year === 'undefined') throw new Error('No year found');
         return date(year, month, day);
     }
 }
 
 export const defaultParserOptions: (Format | Options)[] = [
-    {year: 'numeric', month: 'long', day: 'numeric', weekday: "long"},
+    {year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'},
     {year: 'numeric', month: 'short', day: 'numeric', weekday: 'short'},
     {year: 'numeric', month: 'numeric', day: 'numeric'},
     {year: 'numeric', month: 'short', day: 'numeric'},
-    {year: 'numeric', month: 'long', day: 'numeric'}
+    {year: 'numeric', month: 'long', day: 'numeric'},
 ];
 
 export function parser(locale: string, options?: Format | Options): Parser<Date> {
-    switch (typeof options){
-        case "string": return DateParser.create(locale, {format: options});
-        case "object": return DateParser.create(locale, options);
-        default: return or(...defaultParserOptions.map(o => parser(locale, o)));
+    switch (typeof options) {
+        case 'string':
+            return DateParser.create(locale, {format: options});
+        case 'object':
+            return DateParser.create(locale, options);
+        default:
+            return or(...defaultParserOptions.map(o => parser(locale, o)));
     }
 }
 
 export function formatBuilder(locale: string, format: Format, strict: boolean = false): RegexBuilder {
-    return new RegexBuilder(locale, {...optionsFrom(format), strict}, partsFrom(format))
+    return new RegexBuilder(locale, {...optionsFrom(format), strict}, partsFrom(format));
 }
-

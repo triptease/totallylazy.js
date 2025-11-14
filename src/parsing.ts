@@ -1,12 +1,11 @@
-import {NamedMatch, NamedRegExp, removeUnicodeMarkers} from "./characters";
-import {Mapper} from "./collections";
-import {flatMap} from "./transducers";
-import {cache} from "./cache";
-import {array} from "./array";
+import {NamedMatch, NamedRegExp, removeUnicodeMarkers} from './characters';
+import {Mapper} from './collections';
+import {flatMap} from './transducers';
+import {cache} from './cache';
+import {array} from './array';
 
 export class NamedRegexParser implements Parser<NamedMatch[]> {
-    constructor(protected regex: NamedRegExp) {
-    }
+    constructor(protected regex: NamedRegExp) {}
 
     parse(value: string): NamedMatch[] {
         const match = this.regex.match(value);
@@ -24,8 +23,10 @@ export function namedRegexParser(regex: NamedRegExp) {
 }
 
 export class PreProcessor<T> implements Parser<T> {
-    constructor(private delegate: Parser<T>, private mapper: Mapper<string, string>) {
-    }
+    constructor(
+        private delegate: Parser<T>,
+        private mapper: Mapper<string, string>
+    ) {}
 
     parse(value: string): T {
         return this.delegate.parse(this.mapper(value));
@@ -41,8 +42,10 @@ export function preProcess<T>(delegate: Parser<T>, mapper: Mapper<string, string
 }
 
 export class MappingParser<A, B> implements Parser<B> {
-    constructor(private parser: Parser<A>, private mapper: Mapper<A, B>) {
-    }
+    constructor(
+        private parser: Parser<A>,
+        private mapper: Mapper<A, B>
+    ) {}
 
     parse(value: string): B {
         return this.mapper(this.parser.parse(removeUnicodeMarkers(value)));
@@ -50,13 +53,16 @@ export class MappingParser<A, B> implements Parser<B> {
 
     parseAll(value: string): B[] {
         if (!value) return [];
-        return array(this.parser.parseAll(removeUnicodeMarkers(value)), flatMap(v => {
-            try {
-                return [this.mapper(v)]
-            } catch (e) {
-                return [];
-            }
-        }));
+        return array(
+            this.parser.parseAll(removeUnicodeMarkers(value)),
+            flatMap(v => {
+                try {
+                    return [this.mapper(v)];
+                } catch (e) {
+                    return [];
+                }
+            })
+        );
     }
 }
 
@@ -91,16 +97,14 @@ export class FailParser implements Parser<any> {
 }
 
 export class OrParser<T> implements Parser<T> {
-    constructor(private readonly parsers: Parser<T>[]) {
-    }
+    constructor(private readonly parsers: Parser<T>[]) {}
 
     parse(value: string): T {
         for (const parser of this.parsers) {
             try {
                 const result = parser.parse(value);
                 if (result) return result;
-            } catch (ignore) {
-            }
+            } catch (ignore) {}
         }
         throw new Error(`Unable to parse value: ${value}`);
     }
@@ -123,11 +127,10 @@ export function parsers<T>(...parsers: Parser<T>[]): Parser<T> {
 }
 
 export class AllParser<T> implements Parser<T> {
-    constructor(private readonly parsers: Parser<T>[]) {
-    }
+    constructor(private readonly parsers: Parser<T>[]) {}
 
     parse(value: string): T {
-        throw new Error("Not supported, please call AllParser.parseAll");
+        throw new Error('Not supported, please call AllParser.parseAll');
     }
 
     parseAll(value: string): T[] {
@@ -140,8 +143,7 @@ export function all<T>(...parsers: Parser<T>[]): Parser<T> {
 }
 
 export class CachingParser<T> implements Parser<T> {
-    constructor(private parser: Parser<T>) {
-    }
+    constructor(private parser: Parser<T>) {}
 
     @cache parse(value: string): T {
         return this.parser.parse(value);
@@ -153,20 +155,17 @@ export class CachingParser<T> implements Parser<T> {
 }
 
 export class RuntimeSafeParser<T> implements Parser<T> {
-    constructor(private parser: Parser<T>) {
-    }
+    constructor(private parser: Parser<T>) {}
 
     parse(value: unknown): T {
-        if(typeof value !== 'string') throw new Error(`Expected string, got ${typeof value}`);
+        if (typeof value !== 'string') throw new Error(`Expected string, got ${typeof value}`);
         return this.parser.parse(value);
     }
 
     parseAll(value: unknown): T[] {
-        if(typeof value !== 'string') return [];
+        if (typeof value !== 'string') return [];
         return this.parser.parseAll(value);
     }
 }
 
 export const extraDelimiters = ' -/';
-
-

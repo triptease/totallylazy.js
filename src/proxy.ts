@@ -6,7 +6,7 @@ export function call<T, S>(value: S): any {
 
 export function on<T>(instance: new () => T): T {
     invocation = [];
-    const proxy:any = new Proxy(instance, {
+    const proxy: any = new Proxy(instance, {
         get(target: object, name: string, receiver: any) {
             invocation.push(name);
             return proxy;
@@ -18,7 +18,7 @@ export function on<T>(instance: new () => T): T {
         apply(target: object, thisArg: any, args: any[]) {
             invocation.push(args);
             return proxy;
-        }
+        },
     });
     return proxy as any;
 }
