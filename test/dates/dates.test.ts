@@ -1,4 +1,3 @@
-import {assert} from 'chai';
 import {runningInNode} from '../../src/node';
 import {
     date,
@@ -25,12 +24,12 @@ import {array} from '../../src/array';
 
 export function assertFormat(locale: string, date: Date, options: Options, expected: string) {
     const formatted = format(date, locale, options);
-    assert.equal(formatted, expected);
+    expect(formatted).toBe(expected);
     assertParse(locale, expected, date, options);
 }
 
 export function assertDates(parsed: Date, expected: Date) {
-    assert.equal(parsed.toISOString(), expected.toISOString());
+    expect(parsed.toISOString()).toBe(expected.toISOString());
 }
 
 export function assertParse(locale: string, value: string, expected: Date, options?: string | Options) {
@@ -47,7 +46,7 @@ function assertParseNoYears(locale: string, value: string, ...expected: Date[]) 
         factory: new SmartDate(new StoppedClock(now)),
     };
     const result = parser(locale, options).parseAll(value);
-    assert.equal(result.length, expected.length);
+    expect(result.length).toBe(expected.length);
     for (const [a, e] of sequence(result, zip(expected))) {
         assertDates(a, e);
     }
@@ -101,10 +100,10 @@ describe('InferYearViaWeekday', () => {
             iterate(d => Days.add(d, 1), date(start, 1, 1)),
             takeWhile(d => yearOf(d) <= end)
         );
-        assert.equal(dates.length, 1826);
+        expect(dates.length).toBe(1826);
 
         for (const d of dates) {
-            assert.deepEqual(factory.create({month: monthOf(d), day: dayOf(d), weekday: weekdayOf(d)}), d);
+            expect(factory.create({month: monthOf(d), day: dayOf(d), weekday: weekdayOf(d)})).toEqual(d);
         }
     });
 
@@ -129,9 +128,9 @@ describe('InferYear', () => {
     it('throws on invalid years', function () {
         const now = date(2000, 1, 1);
         const factory = InferYear.after(now);
-        assert.throws(() => factory.create({year: -1, month: 1, day: 1}));
-        assert.throws(() => factory.create({year: 1, month: 1, day: 1}));
-        assert.throws(() => factory.create({year: 123, month: 1, day: 1}));
+        expect(() => factory.create({year: -1, month: 1, day: 1}));
+        expect(() => factory.create({year: 1, month: 1, day: 1}));
+        expect(() => factory.create({year: 123, month: 1, day: 1}));
     });
 
     describe('before examples', () => {
@@ -177,21 +176,20 @@ describe('InferYear', () => {
 
 describe('Pivot', () => {
     it('when converting 2 digit years use the pivotYear to correctly wrap around', function () {
-        assert.equal(Pivot.on(2070).create({year: 0, month: 1, day: 2}).toISOString(), date(2000, 1, 2).toISOString());
-        assert.equal(Pivot.on(2070).create({year: 20, month: 1, day: 2}).toISOString(), date(2020, 1, 2).toISOString());
-        assert.equal(Pivot.on(2070).create({year: 70, month: 1, day: 1}).toISOString(), date(1970, 1, 1).toISOString());
-        assert.equal(Pivot.on(2070).create({year: 70, month: 1, day: 2}).toISOString(), date(1970, 1, 2).toISOString());
-        assert.equal(Pivot.on(2070).create({year: 71, month: 1, day: 2}).toISOString(), date(1971, 1, 2).toISOString());
+        expect(Pivot.on(2070).create({year: 0, month: 1, day: 2}).toISOString()).toBe(date(2000, 1, 2).toISOString());
+        expect(Pivot.on(2070).create({year: 20, month: 1, day: 2}).toISOString()).toBe(date(2020, 1, 2).toISOString());
+        expect(Pivot.on(2070).create({year: 70, month: 1, day: 1}).toISOString()).toBe(date(1970, 1, 1).toISOString());
+        expect(Pivot.on(2070).create({year: 70, month: 1, day: 2}).toISOString()).toBe(date(1970, 1, 2).toISOString());
+        expect(Pivot.on(2070).create({year: 71, month: 1, day: 2}).toISOString()).toBe(date(1971, 1, 2).toISOString());
 
-        assert.equal(Pivot.on(2001).create({year: 0, month: 1, day: 2}).toISOString(), date(2000, 1, 2).toISOString());
-        assert.equal(Pivot.on(2001).create({year: 20, month: 1, day: 2}).toISOString(), date(1920, 1, 2).toISOString());
-        assert.equal(Pivot.on(2001).create({year: 70, month: 1, day: 2}).toISOString(), date(1970, 1, 2).toISOString());
-        assert.equal(Pivot.on(2001).create({year: 71, month: 1, day: 2}).toISOString(), date(1971, 1, 2).toISOString());
+        expect(Pivot.on(2001).create({year: 0, month: 1, day: 2}).toISOString()).toBe(date(2000, 1, 2).toISOString());
+        expect(Pivot.on(2001).create({year: 20, month: 1, day: 2}).toISOString()).toBe(date(1920, 1, 2).toISOString());
+        expect(Pivot.on(2001).create({year: 70, month: 1, day: 2}).toISOString()).toBe(date(1970, 1, 2).toISOString());
+        expect(Pivot.on(2001).create({year: 71, month: 1, day: 2}).toISOString()).toBe(date(1971, 1, 2).toISOString());
     });
 
     it('if we pass a 4 digit year in, use it', function () {
-        assert.equal(
-            Pivot.on(2070).create({year: 1999, month: 1, day: 2}).toISOString(),
+        expect(Pivot.on(2070).create({year: 1999, month: 1, day: 2}).toISOString()).toBe(
             date(1999, 1, 2).toISOString()
         );
     });
@@ -226,7 +224,7 @@ describe('SmartDate and Pivot', () => {
             month: 'short',
             factory: new SmartDate(new StoppedClock(now)),
         }).parseAll('Mar 2020');
-        assert.equal(result.length, 0);
+        expect(result.length).toBe(0);
     });
 
     it('can parse dates with no years using SmartDate factory', function () {
@@ -270,23 +268,23 @@ describe('SmartDate and Pivot', () => {
 });
 
 describe('dates', function () {
-    before(function () {
+    beforeAll(function () {
         if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
             console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            this.skip();
+            // Skip all tests in this suite
+            return;
         }
     });
 
     it('examples', () => {
-        assert.deepEqual(
-            parser('ca', 'dd / MMMM / yyyy').parseAll('des de 19 / abril / 2022 fins a 20 / abril / 2022'),
-            [date(2022, 4, 19), date(2022, 4, 20)]
-        );
+        expect(parser('ca', 'dd / MMMM / yyyy').parseAll('des de 19 / abril / 2022 fins a 20 / abril / 2022')).toEqual([
+            date(2022, 4, 19),
+            date(2022, 4, 20),
+        ]);
     });
 
     it('should not blow up with undefined input', () => {
-        assert.deepEqual(
-            parser('en-GB', {month: 'short', day: 'numeric', year: 'numeric'}).parseAll(undefined as any),
+        expect(parser('en-GB', {month: 'short', day: 'numeric', year: 'numeric'}).parseAll(undefined as any)).toEqual(
             []
         );
     });
@@ -341,14 +339,14 @@ describe('dates', function () {
 
     it('does not join adjacent dates', function () {
         const result = parser('en-GB').parseAll('1/2/2030, 3/4/2040');
-        assert.equal(result.length, 2);
+        expect(result.length).toBe(2);
         const [first, second] = result;
         assertDates(first, date(2030, 2, 1));
         assertDates(second, date(2040, 4, 3));
     });
 
     it('when we set specific option do not allow alternative formats', function () {
-        assert.throws(() => parser('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}).parse('10/1/1977'));
+        expect(() => parser('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}).parse('10/1/1977'));
     });
 
     it('supports custom separators', function () {
@@ -361,25 +359,24 @@ describe('dates', function () {
     });
 
     it('should throw on ambiguous input', function () {
-        assert.throws(() => parser('en').parse('13/02/2020'));
+        expect(() => parser('en').parse('13/02/2020'));
         assertDates(parser('en-GB').parse('13/02/2020'), date(2020, 2, 13));
         assertDates(parser('en-US').parse('02/13/2020'), date(2020, 2, 13));
     });
 
     it('can parse multiple dates in a string', function () {
-        assert.deepEqual(parser('en', 'dd MMM yyyy').parseAll('Checkin: 12 Jan 2009 Checkout: 13 Jan 2009'), [
+        expect(parser('en', 'dd MMM yyyy').parseAll('Checkin: 12 Jan 2009 Checkout: 13 Jan 2009')).toEqual([
             date(2009, 1, 12),
             date(2009, 1, 13),
         ]);
     });
 
     it('ignores values that are very nearly a valid date', function () {
-        assert.deepEqual(
+        expect(
             parser('en', 'dd MMM yyyy').parseAll(
                 'Checkin: 12 Jan 2009 Checkout: 13 Jan 2009  Nearly a date: 13 Dan 2009'
-            ),
-            [date(2009, 1, 12), date(2009, 1, 13)]
-        );
+            )
+        ).toEqual([date(2009, 1, 12), date(2009, 1, 13)]);
     });
 
     it('can format and parse a date in many different locals', function () {
@@ -388,7 +385,7 @@ describe('dates', function () {
             for (const option of options) {
                 const formatted = format(original, locale, option);
                 const parsed = parse(formatted, locale, option);
-                assert.equal(parsed.toISOString(), original.toISOString(), locale);
+                expect(parsed.toISOString()).toBe(original.toISOString());
             }
         }
     });
@@ -591,7 +588,7 @@ describe('dates', function () {
 
     it('can parse dates with non breaking space', function () {
         const value = 'Jan 20, 2019';
-        assert.equal(value.charCodeAt(3), 160);
+        expect(value.charCodeAt(3)).toBe(160);
         assertParse('en-US', value, date(2019, 1, 20), {year: 'numeric', month: 'short', day: '2-digit'});
     });
 
@@ -623,7 +620,7 @@ describe('dates', function () {
     });
 
     it('when using a format string do not allow extra separators', () => {
-        assert.throws(() => parser('en', 'dd MMM yyyy').parse('10/Jan/1977'));
+        expect(() => parser('en', 'dd MMM yyyy').parse('10/Jan/1977'));
     });
 
     it("an optional '.' is allowed after month with format strings as long as strict mode is off (default)", () => {
@@ -632,12 +629,12 @@ describe('dates', function () {
     });
 
     it('can force strict mode', () => {
-        assert.throws(() => parser('en', {format: 'dd MMM yyyy', strict: true}).parse('10 Jan. 1977'));
+        expect(() => parser('en', {format: 'dd MMM yyyy', strict: true}).parse('10 Jan. 1977'));
     });
 
     it('when using a format string do not switch month format from text to digits or vice versa', () => {
-        assert.throws(() => parser('en', 'dd MMM yyyy').parse('10 01 1977'));
-        assert.throws(() => parser('en', 'dd MM yyyy').parse('10 Jan 1977'));
+        expect(() => parser('en', 'dd MMM yyyy').parse('10 01 1977'));
+        expect(() => parser('en', 'dd MM yyyy').parse('10 Jan 1977'));
     });
 
     it('can parse using non native implementation', () => {

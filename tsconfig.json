@@ -18,7 +18,8 @@
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule": true,
         "preserveSymlinks": false,
-        "lib": ["dom", "esnext"]
+        "lib": ["dom", "esnext"],
+        "types": ["jest", "node"]
     },
     "exclude": ["node_modules"]
 }

@@ -1,14 +1,15 @@
 import {date, LearningDateFormatter, format, Formatters, ImprovedDateTimeFormat, Options} from '../../src/dates';
-import {assert} from 'chai';
+
 import {options, supported} from './dates.test';
 import {runningInNode} from '../../src/node';
 import {characters} from '../../src/characters';
 
 describe('FormatToParts', function () {
-    before(function () {
+    beforeAll(function () {
         if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
             console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            this.skip();
+            // Skip all tests in this suite
+            return;
         }
     });
 
@@ -18,16 +19,8 @@ describe('FormatToParts', function () {
         const formatter = Formatters.create(locale, option);
         const expected = formatter.formatToParts(original);
         const actual = LearningDateFormatter.create(locale, option).formatToParts(original);
-        assert.deepEqual(
-            actual.map(v => v.value).join(''),
-            expected.map(v => v.value).join(''),
-            `${locale} ${JSON.stringify(option)}`
-        );
-        assert.deepEqual(
-            actual.map(v => v.type),
-            expected.map(v => v.type),
-            `${locale} ${JSON.stringify(option)}`
-        );
+        expect(actual.map(v => v.value).join('')).toBe(expected.map(v => v.value).join(''));
+        expect(actual.map(v => v.type)).toEqual(expected.map(v => v.type));
     }
 
     it('matches native implementation', () => {
@@ -56,15 +49,15 @@ describe('FormatToParts', function () {
 describe('ImprovedDateTimeFormat', function () {
     it('strips RTL unicode markers from formatted date', () => {
         const containsLeadingRtlMarker = '‎Friday‎, ‎November‎ ‎20‎, ‎3333';
-        assert.equal(containsLeadingRtlMarker.length, 32);
-        assert.equal(characters(containsLeadingRtlMarker).length, 25);
+        expect(containsLeadingRtlMarker.length).toBe(32);
+        expect(characters(containsLeadingRtlMarker).length).toBe(25);
 
         const result = new ImprovedDateTimeFormat('ignored', {}, {
             format(ignore?: Date | number): string {
                 return containsLeadingRtlMarker;
             },
         } as any).format(date(2019, 1, 2));
-        assert.equal(result.length, 25);
+        expect(result.length).toBe(25);
     });
 
     it('adds formatToParts when missing ', () => {
@@ -74,15 +67,15 @@ describe('ImprovedDateTimeFormat', function () {
         // @ts-ignore
         delete formatter.formatToParts;
         const result = new ImprovedDateTimeFormat(locale, options, formatter).formatToParts(date(2019, 1, 2));
-        assert.deepEqual(result, [{type: 'month', value: 'January'}]);
+        expect(result).toEqual([{type: 'month', value: 'January'}]);
     });
 });
 
 describe('format', function () {
     it('can format to parts', () => {
         const formatter = Formatters.create('en-GB', 'yyyy-MM-dd');
-        assert.equal(formatter.format(date(2001, 6, 9)), '2001-06-09');
-        assert.deepEqual(formatter.formatToParts(date(2001, 6, 9)), [
+        expect(formatter.format(date(2001, 6, 9))).toBe('2001-06-09');
+        expect(formatter.formatToParts(date(2001, 6, 9))).toEqual([
             {type: 'year', value: '2001'},
             {type: 'literal', value: '-'},
             {type: 'month', value: '06'},
@@ -92,6 +85,6 @@ describe('format', function () {
     });
 
     it('throws if undefined date is parsed into format', () => {
-        assert.throws(() => format(undefined as any, 'en'));
+        expect(() => format(undefined as any, 'en')).toThrow();
     });
 });

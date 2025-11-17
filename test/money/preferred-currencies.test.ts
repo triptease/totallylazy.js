@@ -1,95 +1,94 @@
-import {assert} from 'chai';
 import {PreferredCurrencies} from '../../src/money/preferred-currencies';
 
 describe('PreferredCurrencies', () => {
     it('dollarSymbol', () => {
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('AG'), 'XCD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('AU'), 'AUD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('BS'), 'BSD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('BB'), 'BBD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('BZ'), 'BZD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('BM'), 'BMD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('BN'), 'BND');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('CA'), 'CAD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('CO'), 'COP');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('CU'), 'CUP');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('DM'), 'XCD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('EC'), 'USD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('FM'), 'USD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('KY'), 'KYD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('FJ'), 'FJD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('GD'), 'XCD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('GY'), 'GYD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('HK'), 'HKD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('JM'), 'JMD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('KI'), 'AUD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('KN'), 'XCD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('LC'), 'XCD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('LR'), 'LRD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('MH'), 'USD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('MX'), 'MXN');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('NA'), 'NAD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('NZ'), 'NZD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('SG'), 'SGD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('SB'), 'SBD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('SR'), 'SRD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('SV'), 'USD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('TL'), 'USD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('TW'), 'TWD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('TT'), 'TTD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('TV'), 'AUD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('VC'), 'XCD');
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('ZW'), 'USD');
+        expect(PreferredCurrencies.dollarSymbol('AG')).toEqual('XCD');
+        expect(PreferredCurrencies.dollarSymbol('AU')).toEqual('AUD');
+        expect(PreferredCurrencies.dollarSymbol('BS')).toEqual('BSD');
+        expect(PreferredCurrencies.dollarSymbol('BB')).toEqual('BBD');
+        expect(PreferredCurrencies.dollarSymbol('BZ')).toEqual('BZD');
+        expect(PreferredCurrencies.dollarSymbol('BM')).toEqual('BMD');
+        expect(PreferredCurrencies.dollarSymbol('BN')).toEqual('BND');
+        expect(PreferredCurrencies.dollarSymbol('CA')).toEqual('CAD');
+        expect(PreferredCurrencies.dollarSymbol('CO')).toEqual('COP');
+        expect(PreferredCurrencies.dollarSymbol('CU')).toEqual('CUP');
+        expect(PreferredCurrencies.dollarSymbol('DM')).toEqual('XCD');
+        expect(PreferredCurrencies.dollarSymbol('EC')).toEqual('USD');
+        expect(PreferredCurrencies.dollarSymbol('FM')).toEqual('USD');
+        expect(PreferredCurrencies.dollarSymbol('KY')).toEqual('KYD');
+        expect(PreferredCurrencies.dollarSymbol('FJ')).toEqual('FJD');
+        expect(PreferredCurrencies.dollarSymbol('GD')).toEqual('XCD');
+        expect(PreferredCurrencies.dollarSymbol('GY')).toEqual('GYD');
+        expect(PreferredCurrencies.dollarSymbol('HK')).toEqual('HKD');
+        expect(PreferredCurrencies.dollarSymbol('JM')).toEqual('JMD');
+        expect(PreferredCurrencies.dollarSymbol('KI')).toEqual('AUD');
+        expect(PreferredCurrencies.dollarSymbol('KN')).toEqual('XCD');
+        expect(PreferredCurrencies.dollarSymbol('LC')).toEqual('XCD');
+        expect(PreferredCurrencies.dollarSymbol('LR')).toEqual('LRD');
+        expect(PreferredCurrencies.dollarSymbol('MH')).toEqual('USD');
+        expect(PreferredCurrencies.dollarSymbol('MX')).toEqual('MXN');
+        expect(PreferredCurrencies.dollarSymbol('NA')).toEqual('NAD');
+        expect(PreferredCurrencies.dollarSymbol('NZ')).toEqual('NZD');
+        expect(PreferredCurrencies.dollarSymbol('SG')).toEqual('SGD');
+        expect(PreferredCurrencies.dollarSymbol('SB')).toEqual('SBD');
+        expect(PreferredCurrencies.dollarSymbol('SR')).toEqual('SRD');
+        expect(PreferredCurrencies.dollarSymbol('SV')).toEqual('USD');
+        expect(PreferredCurrencies.dollarSymbol('TL')).toEqual('USD');
+        expect(PreferredCurrencies.dollarSymbol('TW')).toEqual('TWD');
+        expect(PreferredCurrencies.dollarSymbol('TT')).toEqual('TTD');
+        expect(PreferredCurrencies.dollarSymbol('TV')).toEqual('AUD');
+        expect(PreferredCurrencies.dollarSymbol('VC')).toEqual('XCD');
+        expect(PreferredCurrencies.dollarSymbol('ZW')).toEqual('USD');
     });
 
     it('does not switch dinar to dollar', () => {
-        assert.deepEqual(PreferredCurrencies.dollarSymbol('SD'), 'USD');
+        expect(PreferredCurrencies.dollarSymbol('SD')).toEqual('USD');
     });
 
     it('poundSymbol', () => {
-        assert.deepEqual(PreferredCurrencies.poundSymbol('EG'), 'EGP');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('FK'), 'FKP');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('GI'), 'GIP');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('GG'), 'GBP');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('IM'), 'GBP');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('JE'), 'GBP');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('LB'), 'LBP');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('SH'), 'SHP');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('SS'), 'SSP');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('SD'), 'SDG');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('SY'), 'SYP');
-        assert.deepEqual(PreferredCurrencies.poundSymbol('GB'), 'GBP');
+        expect(PreferredCurrencies.poundSymbol('EG')).toEqual('EGP');
+        expect(PreferredCurrencies.poundSymbol('FK')).toEqual('FKP');
+        expect(PreferredCurrencies.poundSymbol('GI')).toEqual('GIP');
+        expect(PreferredCurrencies.poundSymbol('GG')).toEqual('GBP');
+        expect(PreferredCurrencies.poundSymbol('IM')).toEqual('GBP');
+        expect(PreferredCurrencies.poundSymbol('JE')).toEqual('GBP');
+        expect(PreferredCurrencies.poundSymbol('LB')).toEqual('LBP');
+        expect(PreferredCurrencies.poundSymbol('SH')).toEqual('SHP');
+        expect(PreferredCurrencies.poundSymbol('SS')).toEqual('SSP');
+        expect(PreferredCurrencies.poundSymbol('SD')).toEqual('SDG');
+        expect(PreferredCurrencies.poundSymbol('SY')).toEqual('SYP');
+        expect(PreferredCurrencies.poundSymbol('GB')).toEqual('GBP');
     });
 
     it('yenSymbol', () => {
-        assert.deepEqual(PreferredCurrencies.yenSymbol('CN'), 'CNY');
-        assert.deepEqual(PreferredCurrencies.yenSymbol('JP'), 'JPY');
+        expect(PreferredCurrencies.yenSymbol('CN')).toEqual('CNY');
+        expect(PreferredCurrencies.yenSymbol('JP')).toEqual('JPY');
     });
 
     it('kroneSymbol', () => {
-        assert.deepEqual(PreferredCurrencies.kroneSymbol('DK'), 'DKK');
-        assert.deepEqual(PreferredCurrencies.kroneSymbol('FO'), 'DKK');
-        assert.deepEqual(PreferredCurrencies.kroneSymbol('GL'), 'DKK');
-        assert.deepEqual(PreferredCurrencies.kroneSymbol('IS'), 'ISK');
-        assert.deepEqual(PreferredCurrencies.kroneSymbol('NO'), 'NOK');
-        assert.deepEqual(PreferredCurrencies.kroneSymbol('SE'), 'SEK');
+        expect(PreferredCurrencies.kroneSymbol('DK')).toEqual('DKK');
+        expect(PreferredCurrencies.kroneSymbol('FO')).toEqual('DKK');
+        expect(PreferredCurrencies.kroneSymbol('GL')).toEqual('DKK');
+        expect(PreferredCurrencies.kroneSymbol('IS')).toEqual('ISK');
+        expect(PreferredCurrencies.kroneSymbol('NO')).toEqual('NOK');
+        expect(PreferredCurrencies.kroneSymbol('SE')).toEqual('SEK');
     });
 
     it('rupeeSymbol', () => {
-        assert.deepEqual(PreferredCurrencies.rupeeSymbol('IN'), 'INR');
-        assert.deepEqual(PreferredCurrencies.rupeeSymbol('ID'), 'IDR');
-        assert.deepEqual(PreferredCurrencies.rupeeSymbol('MU'), 'MUR');
-        assert.deepEqual(PreferredCurrencies.rupeeSymbol('NP'), 'NPR');
-        assert.deepEqual(PreferredCurrencies.rupeeSymbol('PK'), 'PKR');
-        assert.deepEqual(PreferredCurrencies.rupeeSymbol('LK'), 'LKR');
+        expect(PreferredCurrencies.rupeeSymbol('IN')).toEqual('INR');
+        expect(PreferredCurrencies.rupeeSymbol('ID')).toEqual('IDR');
+        expect(PreferredCurrencies.rupeeSymbol('MU')).toEqual('MUR');
+        expect(PreferredCurrencies.rupeeSymbol('NP')).toEqual('NPR');
+        expect(PreferredCurrencies.rupeeSymbol('PK')).toEqual('PKR');
+        expect(PreferredCurrencies.rupeeSymbol('LK')).toEqual('LKR');
     });
 
     it('for', () => {
-        assert.deepEqual(PreferredCurrencies.for('GB'), ['USD', 'GBP', 'JPY', 'DKK', 'INR']);
-        assert.deepEqual(PreferredCurrencies.for('AU'), ['AUD', 'GBP', 'JPY', 'DKK', 'INR']);
-        assert.deepEqual(PreferredCurrencies.for('SD'), ['USD', 'SDG', 'JPY', 'DKK', 'INR']);
-        assert.deepEqual(PreferredCurrencies.for('CN'), ['USD', 'GBP', 'CNY', 'DKK', 'INR']);
-        assert.deepEqual(PreferredCurrencies.for('PK'), ['USD', 'GBP', 'JPY', 'DKK', 'PKR']);
-        assert.deepEqual(PreferredCurrencies.for(undefined), ['USD', 'GBP', 'JPY', 'DKK', 'INR']);
+        expect(PreferredCurrencies.for('GB')).toEqual(['USD', 'GBP', 'JPY', 'DKK', 'INR']);
+        expect(PreferredCurrencies.for('AU')).toEqual(['AUD', 'GBP', 'JPY', 'DKK', 'INR']);
+        expect(PreferredCurrencies.for('SD')).toEqual(['USD', 'SDG', 'JPY', 'DKK', 'INR']);
+        expect(PreferredCurrencies.for('CN')).toEqual(['USD', 'GBP', 'CNY', 'DKK', 'INR']);
+        expect(PreferredCurrencies.for('PK')).toEqual(['USD', 'GBP', 'JPY', 'DKK', 'PKR']);
+        expect(PreferredCurrencies.for(undefined)).toEqual(['USD', 'GBP', 'JPY', 'DKK', 'INR']);
     });
 });

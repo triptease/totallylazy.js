@@ -1,4 +1,3 @@
-import {assert} from 'chai';
 import {characters} from '../src/characters';
 import {sequence} from '../src/sequence';
 import {zip} from '../src/transducers/zip';
@@ -21,9 +20,9 @@ describe('CachingParser', () => {
 
         const cachingParser = new CachingParser(new CountingParser());
 
-        assert.equal(cachingParser.parse('foo'), 1);
-        assert.equal(cachingParser.parse('foo'), 1);
-        assert.equal(cachingParser.parse('bar'), 2);
+        expect(cachingParser.parse('foo')).toBe(1);
+        expect(cachingParser.parse('foo')).toBe(1);
+        expect(cachingParser.parse('bar')).toBe(2);
     });
 });
 
@@ -31,21 +30,21 @@ describe('Numerals', () => {
     it('should handle arabic numerals', function () {
         const locale = 'ar-EG';
         for (const [character, number] of sequence(characters('١٢٣٤٥٦٧٨٩٠'), zip([1, 2, 3, 4, 5, 6, 7, 8, 9, 0]))) {
-            assert.equal(Numerals.get(locale).parse(character), number);
+            expect(Numerals.get(locale).parse(character)).toBe(number);
         }
     });
 
     it('should handle western numerals', function () {
         const locale = 'en';
         for (const number of [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]) {
-            assert.equal(Numerals.get(locale).parse(number.toString()), number);
+            expect(Numerals.get(locale).parse(number.toString())).toBe(number);
         }
     });
 });
 
 describe('digits', () => {
     it('works', function () {
-        assert.equal(Numerals.get('fr').pattern, '\\d');
-        assert.equal(Numerals.get('ar-EG').pattern, '\\d٠١٢٣٤٥٦٧٨٩');
+        expect(Numerals.get('fr').pattern).toBe('\\d');
+        expect(Numerals.get('ar-EG').pattern).toBe('\\d٠١٢٣٤٥٦٧٨٩');
     });
 });

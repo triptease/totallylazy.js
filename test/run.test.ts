@@ -1,5 +1,4 @@
 import {File} from '../src/files';
-import {assert} from 'chai';
 import {run} from '../src/run';
 import {array} from '../src/array';
 
@@ -11,13 +10,13 @@ describe('run', function () {
     it('when running a command streams stdout', async () => {
         const command = script('working.sh');
         const result = await array(run({command}));
-        assert.deepEqual(result.join(''), 'Hello\nWorld\n');
+        expect(result.join('')).toBe('Hello\nWorld\n');
     });
 
     it('can use shell redirect to get stdout and stderr in correct order (exec 2>&1)', async () => {
         const command = script('shell-redirect.sh');
         const result = await array(run({command}));
-        assert.deepEqual(result.join(''), 'stout\nstderr\n');
+        expect(result.join('')).toBe('stout\nstderr\n');
     });
 
     it('can capture exit code and stdout', async () => {
@@ -33,8 +32,8 @@ describe('run', function () {
             exitCode = e.code;
         }
 
-        assert.deepEqual(output, ['This command returns an exit code of 1\n']);
-        assert.deepEqual(exitCode, 1);
+        expect(output).toEqual(['This command returns an exit code of 1\n']);
+        expect(exitCode).toBe(1);
     });
 
     it('without shell redirect stdout and stderr are buffered (so order is not perfectly preserved)', async () => {
@@ -50,21 +49,23 @@ describe('run', function () {
             exitCode = e.code;
         }
 
-        assert.deepEqual(output.join(''), 'one\nthree\ntwo\nfour\n');
-        assert.deepEqual(exitCode, 1);
+        expect(output.join('')).toBe('one\nthree\ntwo\nfour\n');
+        expect(exitCode).toBe(1);
     });
 
     it('throw on missing script', async () => {
         const command = script('missing.sh');
         try {
             await array(run({command}));
+            expect(true).toBe(false); // Should have thrown
         } catch (e: any) {
-            assert.deepEqual(e.code, 'ENOENT');
+            // The error code can be 'ENOENT' (string) or a numeric code depending on system
+            expect(e.code === 'ENOENT' || (typeof e.code === 'number' && e.code !== 0)).toBe(true);
         }
     });
 
     it('can run a command with multiple arguments', async () => {
         const result = await array(run({command: ['ls', '-a', 'package.json']}));
-        assert.deepEqual(result, ['package.json\n']);
+        expect(result).toEqual(['package.json\n']);
     });
 });

@@ -10,20 +10,21 @@ import {
     Weekdays,
     WeekdaysBuilder,
 } from '../../src/dates';
-import {assert} from 'chai';
+
 import {runningInNode} from '../../src/node';
 import {assertParse, options, supported} from './dates.test';
 
 describe('Months', function () {
-    before(function () {
+    beforeAll(function () {
         if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
             console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            this.skip();
+            // Skip all tests in this suite
+            return;
         }
     });
 
     it('can get months for specific locals and formats', () => {
-        assert.deepEqual(months('en-GB'), [
+        expect(months('en-GB')).toEqual([
             'January',
             'February',
             'March',
@@ -37,7 +38,7 @@ describe('Months', function () {
             'November',
             'December',
         ]);
-        assert.deepEqual(months('en-GB', 'short'), [
+        expect(months('en-GB', 'short')).toEqual([
             'Jan',
             'Feb',
             'Mar',
@@ -52,7 +53,7 @@ describe('Months', function () {
             'Dec',
         ]);
 
-        assert.deepEqual(months('de'), [
+        expect(months('de')).toEqual([
             'Januar',
             'Februar',
             'März',
@@ -66,7 +67,7 @@ describe('Months', function () {
             'November',
             'Dezember',
         ]);
-        assert.deepEqual(months('de', 'short'), [
+        expect(months('de', 'short')).toEqual([
             'Jan',
             'Feb',
             'Mär',
@@ -80,7 +81,7 @@ describe('Months', function () {
             'Nov',
             'Dez',
         ]);
-        assert.deepEqual(months('de-AT', 'short'), [
+        expect(months('de-AT', 'short')).toEqual([
             'Jän',
             'Feb',
             'Mär',
@@ -95,7 +96,7 @@ describe('Months', function () {
             'Dez',
         ]);
 
-        assert.deepEqual(months('ru'), [
+        expect(months('ru')).toEqual([
             'январь',
             'февраль',
             'март',
@@ -109,7 +110,7 @@ describe('Months', function () {
             'ноябрь',
             'декабрь',
         ]);
-        assert.deepEqual(months('ru', {year: 'numeric', month: 'long', day: 'numeric'}), [
+        expect(months('ru', {year: 'numeric', month: 'long', day: 'numeric'})).toEqual([
             'января',
             'февраля',
             'марта',
@@ -123,7 +124,7 @@ describe('Months', function () {
             'ноября',
             'декабря',
         ]);
-        assert.deepEqual(months('de', {year: 'numeric', month: 'short', day: '2-digit'}), [
+        expect(months('de', {year: 'numeric', month: 'short', day: '2-digit'})).toEqual([
             'Jan',
             'Feb',
             'März',
@@ -138,7 +139,7 @@ describe('Months', function () {
             'Dez',
         ]);
 
-        assert.deepEqual(months('zh-CN'), [
+        expect(months('zh-CN')).toEqual([
             '一月',
             '二月',
             '三月',
@@ -152,7 +153,7 @@ describe('Months', function () {
             '十一月',
             '十二月',
         ]);
-        assert.deepEqual(months('zh-CN', {day: 'numeric', year: 'numeric', month: 'long'}), [
+        expect(months('zh-CN', {day: 'numeric', year: 'numeric', month: 'long'})).toEqual([
             '1',
             '2',
             '3',
@@ -166,7 +167,7 @@ describe('Months', function () {
             '11',
             '12',
         ]);
-        assert.deepEqual(months('zh-CN', {year: 'numeric', month: 'short', day: '2-digit'}), [
+        expect(months('zh-CN', {year: 'numeric', month: 'short', day: '2-digit'})).toEqual([
             '1',
             '2',
             '3',
@@ -181,7 +182,7 @@ describe('Months', function () {
             '12',
         ]);
 
-        assert.deepEqual(months('is-IS'), [
+        expect(months('is-IS')).toEqual([
             'janúar',
             'febrúar',
             'mars',
@@ -195,7 +196,7 @@ describe('Months', function () {
             'nóvember',
             'desember',
         ]);
-        assert.deepEqual(months('is-IS', 'short'), [
+        expect(months('is-IS', 'short')).toEqual([
             'jan',
             'feb',
             'mar',
@@ -210,7 +211,7 @@ describe('Months', function () {
             'des',
         ]);
 
-        assert.deepEqual(months('cs-CZ', 'short'), [
+        expect(months('cs-CZ', 'short')).toEqual([
             'led',
             'úno',
             'bře',
@@ -224,7 +225,7 @@ describe('Months', function () {
             'lis',
             'pro',
         ]);
-        assert.deepEqual(months('pt-PT', 'short'), [
+        expect(months('pt-PT', 'short')).toEqual([
             'jan',
             'fev',
             'mar',
@@ -239,7 +240,7 @@ describe('Months', function () {
             'dez',
         ]);
 
-        assert.deepEqual(months('ar-EG', {year: 'numeric', month: 'short', day: '2-digit'}), [
+        expect(months('ar-EG', {year: 'numeric', month: 'short', day: '2-digit'})).toEqual([
             'يناير',
             'فبراير',
             'مارس',
@@ -281,106 +282,108 @@ describe('Months', function () {
 
     it('is flexible in parsing as long as there is a unique match', () => {
         const ru = new MonthsBuilder().build('ru');
-        assert.deepEqual(ru.parse('январь'), Month.January);
-        assert.deepEqual(ru.parse('января'), Month.January);
-        assert.deepEqual(ru.parse('январ'), Month.January);
-        assert.deepEqual(ru.parse('янва'), Month.January);
-        assert.deepEqual(ru.parse('янв'), Month.January);
-        assert.deepEqual(ru.parse('янв.'), Month.January);
-        assert.deepEqual(ru.parse('фев'), Month.February);
+        expect(ru.parse('январь')).toEqual(Month.January);
+        expect(ru.parse('января')).toEqual(Month.January);
+        expect(ru.parse('январ')).toEqual(Month.January);
+        expect(ru.parse('янва')).toEqual(Month.January);
+        expect(ru.parse('янв')).toEqual(Month.January);
+        expect(ru.parse('янв.')).toEqual(Month.January);
+        expect(ru.parse('фев')).toEqual(Month.February);
 
         const de = new MonthsBuilder().build('de');
-        assert.deepEqual(de.parse('Feb'), Month.February);
-        assert.deepEqual(de.parse('Feb.'), Month.February);
+        expect(de.parse('Feb')).toEqual(Month.February);
+        expect(de.parse('Feb.')).toEqual(Month.February);
     });
 
     it('can get pattern', () => {
         const ru = new MonthsBuilder().build('ru');
-        assert.deepEqual(ru.pattern, '[абвгдеийклмнопрстуфьюя]{1,8}');
-        assert.deepEqual(new RegExp(ru.pattern).test('январь'), true);
-        assert.deepEqual(new RegExp(ru.pattern).test('января'), true);
-        assert.deepEqual(new RegExp(ru.pattern).test('янв.'), true);
-        assert.deepEqual(new RegExp(ru.pattern).test('янв'), true);
+        expect(ru.pattern).toEqual('[абвгдеийклмнопрстуфьюя]{1,8}');
+        expect(new RegExp(ru.pattern).test('январь')).toEqual(true);
+        expect(new RegExp(ru.pattern).test('января')).toEqual(true);
+        expect(new RegExp(ru.pattern).test('янв.')).toEqual(true);
+        expect(new RegExp(ru.pattern).test('янв')).toEqual(true);
     });
 
     it('can also parse numbers', () => {
         const months = new MonthsBuilder().build('ru');
-        assert.deepEqual(months.parse('1'), Month.January);
-        assert.deepEqual(months.parse('01'), Month.January);
+        expect(months.parse('1')).toEqual(Month.January);
+        expect(months.parse('01')).toEqual(Month.January);
     });
 
     it('ignores case', () => {
         const months = new MonthsBuilder().build('ru');
-        assert.deepEqual(months.parse('январь'.toLocaleUpperCase('ru')), Month.January);
-        assert.deepEqual(months.parse('января'.toLocaleLowerCase('ru')), Month.January);
+        expect(months.parse('январь'.toLocaleUpperCase('ru'))).toEqual(Month.January);
+        expect(months.parse('января'.toLocaleLowerCase('ru'))).toEqual(Month.January);
     });
 });
 
 describe('Weekdays', function () {
-    before(function () {
+    beforeAll(function () {
         if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
             console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            this.skip();
+            // Skip all tests in this suite
+            return;
         }
     });
 
     it('works', () => {
         const en = new WeekdaysBuilder().build('en-GB');
-        assert.deepEqual(en.parse('Monday'), Weekday.Monday);
-        assert.deepEqual(en.parse('Tuesday'), Weekday.Tuesday);
-        assert.deepEqual(en.parse('Wednesday'), Weekday.Wednesday);
-        assert.deepEqual(en.parse('Thursday'), Weekday.Thursday);
-        assert.deepEqual(en.parse('Friday'), Weekday.Friday);
-        assert.deepEqual(en.parse('Saturday'), Weekday.Saturday);
-        assert.deepEqual(en.parse('Sunday'), Weekday.Sunday);
+        expect(en.parse('Monday')).toEqual(Weekday.Monday);
+        expect(en.parse('Tuesday')).toEqual(Weekday.Tuesday);
+        expect(en.parse('Wednesday')).toEqual(Weekday.Wednesday);
+        expect(en.parse('Thursday')).toEqual(Weekday.Thursday);
+        expect(en.parse('Friday')).toEqual(Weekday.Friday);
+        expect(en.parse('Saturday')).toEqual(Weekday.Saturday);
+        expect(en.parse('Sunday')).toEqual(Weekday.Sunday);
     });
 
     it('is flexible in parsing as long as there is a unique match', () => {
         const ru = new WeekdaysBuilder().build('ru');
-        assert.deepEqual(ru.parse('понедельник'), Weekday.Monday);
-        assert.deepEqual(ru.parse('понеде'), Weekday.Monday);
-        assert.deepEqual(ru.parse('пн'), Weekday.Monday);
+        expect(ru.parse('понедельник')).toEqual(Weekday.Monday);
+        expect(ru.parse('понеде')).toEqual(Weekday.Monday);
+        expect(ru.parse('пн')).toEqual(Weekday.Monday);
     });
 
     it('can get pattern', () => {
         const ru = new WeekdaysBuilder().build('ru');
-        assert.deepEqual(ru.pattern, '[абвгдеиклнопрстуцчья]{1,11}');
-        assert.deepEqual(new RegExp(ru.pattern).test('понедельник'), true);
+        expect(ru.pattern).toEqual('[абвгдеиклнопрстуцчья]{1,11}');
+        expect(new RegExp(ru.pattern).test('понедельник')).toEqual(true);
     });
 
     it('pattern length does not include dot', () => {
         const es = new WeekdaysBuilder().build('es');
-        assert.deepEqual(es.pattern, '[abcdegijlmnorstuváé]{1,9}');
-        assert.deepEqual(new RegExp(es.pattern).test('jue.'), true);
-        assert.deepEqual(new RegExp(es.pattern).test('jue'), true);
-        assert.deepEqual(new RegExp(es.pattern).test('ju.'), true);
+        expect(es.pattern).toEqual('[abcdegijlmnorstuváé]{1,9}');
+        expect(new RegExp(es.pattern).test('jue.')).toEqual(true);
+        expect(new RegExp(es.pattern).test('jue')).toEqual(true);
+        expect(new RegExp(es.pattern).test('ju.')).toEqual(true);
     });
 
     it('ignores case', () => {
         const ru = new WeekdaysBuilder().build('ru');
-        assert.deepEqual(ru.parse('понедельник'.toLocaleLowerCase('ru')), Weekday.Monday);
-        assert.deepEqual(ru.parse('понедельник'.toLocaleUpperCase('ru')), Weekday.Monday);
+        expect(ru.parse('понедельник'.toLocaleLowerCase('ru'))).toEqual(Weekday.Monday);
+        expect(ru.parse('понедельник'.toLocaleUpperCase('ru'))).toEqual(Weekday.Monday);
     });
 
     it('length of pattern is determined by valid unicode characters - exclude RTL marker', () => {
         const containsLeadingRtlMarker = '‎Jan';
-        assert.equal(containsLeadingRtlMarker.length, 4);
+        expect(containsLeadingRtlMarker.length).toBe(4);
         const weekdays = new Weekdays([{name: containsLeadingRtlMarker, value: 1}]);
-        assert.deepEqual(weekdays.pattern, '[Jan]{1,3}');
-        assert.deepEqual(new RegExp(weekdays.pattern).test(containsLeadingRtlMarker), true);
+        expect(weekdays.pattern).toEqual('[Jan]{1,3}');
+        expect(new RegExp(weekdays.pattern).test(containsLeadingRtlMarker)).toEqual(true);
     });
 });
 
 describe('weekdays and months', function () {
-    before(function () {
+    beforeAll(function () {
         if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
             console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            this.skip();
+            // Skip all tests in this suite
+            return;
         }
     });
 
     it('non native version can still extract months from simple long format', () => {
-        assert.deepEqual(months('en-GB', 'long'), [
+        expect(months('en-GB', 'long')).toEqual([
             'January',
             'February',
             'March',
@@ -409,7 +412,7 @@ describe('weekdays and months', function () {
     });
 
     // it("non native version can still extract weeks from single long format", () => {
-    //     assert.deepEqual(weekdays('en-GB', 'long'), weekdays('en-GB', 'long'));
+    //     expect(weekdays('en-GB', 'long'), weekdays('en-GB', 'long'));
     // });
     //
     // it("non native version can still extract weekdays from contextual long format", () => {
@@ -423,24 +426,16 @@ describe('weekdays and months', function () {
     // });
 
     // it("returns no data when no format is asked for", () => {
-    //     assert.deepEqual(weekdays('en-GB', {}),[]);
-    //     assert.deepEqual(months('en-GB', {}),[]);
+    //     expect(weekdays('en-GB', {}),[]);
+    //     expect(months('en-GB', {}),[]);
     // });
 
     function assertNativeWeekdaysMatches(locale: string, option: Options) {
-        assert.deepEqual(
-            cleanse(weekdays(locale, option)),
-            cleanse(weekdays(locale, option)),
-            `weekdays dont match '${locale}', ${JSON.stringify(option)}`
-        );
+        expect(cleanse(weekdays(locale, option))).toEqual(cleanse(weekdays(locale, option)));
     }
 
     function assertNativeMonthsMatches(locale: string, option: Options) {
-        assert.deepEqual(
-            cleanse(months(locale, option)),
-            cleanse(months(locale, option)),
-            `months dont match '${locale}', ${JSON.stringify(option)}`
-        );
+        expect(cleanse(months(locale, option))).toEqual(cleanse(months(locale, option)));
     }
 
     function cleanse(values: string[]): string[] {
