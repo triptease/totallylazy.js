@@ -59,7 +59,7 @@ jobs:
       - run:
           name: Verify that gcloud is authenticated
           environment:
-            GCP_SERVICE_ACCOUNT_EMAIL: jennings-oidc-test@makoto-workbench.iam.gserviceaccount.com
+            GCP_SERVICE_ACCOUNT_EMAIL: localised-parsing@triptease-onboard.iam.gserviceaccount.com
           command: gcloud iam service-accounts get-iam-policy "${GCP_SERVICE_ACCOUNT_EMAIL}"
       - run:
           name: Verify that ADC works
