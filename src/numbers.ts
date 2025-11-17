@@ -1,4 +1,4 @@
-import {Reducer} from "./collections";
+import {Reducer} from './collections';
 
 export function increment(a: number): number {
     return a + 1;

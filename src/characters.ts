@@ -9,11 +9,13 @@ export interface NamedMatch {
 
 export type NonMatch = string;
 
-export type MatchOrNot = NamedMatch[]|NonMatch;
+export type MatchOrNot = NamedMatch[] | NonMatch;
 
 export class NamedRegExp {
-    constructor(public pattern: RegExp, public names: Names) {
-    }
+    constructor(
+        public pattern: RegExp,
+        public names: Names
+    ) {}
 
     static create(originalPattern: string, flags?: string): NamedRegExp {
         const names: Names = [];
@@ -35,7 +37,7 @@ export class NamedRegExp {
         return values.map((v, i) => ({name: this.names[i], value: v}));
     }
 
-    * exec(value:string): Iterable<NamedMatch[]> {
+    *exec(value: string): Iterable<NamedMatch[]> {
         const stateful = new RegExp(this.pattern.source, 'g');
         while (true) {
             const match = stateful.exec(value);
@@ -44,19 +46,19 @@ export class NamedRegExp {
         }
     }
 
-    * iterate(value:string): Iterable<MatchOrNot> {
+    *iterate(value: string): Iterable<MatchOrNot> {
         let position = 0;
         const stateful = new RegExp(this.pattern.source, 'g');
         while (true) {
             const match = stateful.exec(value);
             if (!match) break;
             const nonMatch = value.substring(position, match.index);
-            if(nonMatch) yield nonMatch;
+            if (nonMatch) yield nonMatch;
             yield this.namedMatch(match);
             position = stateful.lastIndex;
         }
         const nonMatch = value.substring(position);
-        if(nonMatch) yield nonMatch;
+        if (nonMatch) yield nonMatch;
     }
 
     toString() {
@@ -66,7 +68,7 @@ export class NamedRegExp {
     toJSON() {
         return {
             pattern: this.pattern.source,
-            names: this.names
+            names: this.names,
         };
     }
 }
@@ -76,11 +78,15 @@ export function isNamedMatch(value: MatchOrNot): value is NamedMatch[] {
 }
 
 export function isNonMatch(value: MatchOrNot): value is NonMatch {
-    return typeof value === "string";
+    return typeof value === 'string';
 }
 
-
-export function replace(regex: RegExp, value: string, replacer: (match: RegExpExecArray) => string, nonMatchedReplacer: (a: string) => string = (value) => value) {
+export function replace(
+    regex: RegExp,
+    value: string,
+    replacer: (match: RegExpExecArray) => string,
+    nonMatchedReplacer: (a: string) => string = value => value
+) {
     const result = [];
 
     let position = 0;
@@ -92,7 +98,7 @@ export function replace(regex: RegExp, value: string, replacer: (match: RegExpEx
     }
     result.push(nonMatchedReplacer(value.substring(position)));
 
-    return result.join("");
+    return result.join('');
 }
 
 export function prefix(charactersA: string[], charactersB: string[]): number {
@@ -111,33 +117,36 @@ export function suffix(charactersA: string[], charactersB: string[]): number {
 export function different(values: string[]): string[] {
     const chars = values.map(characters);
 
-    const [smallestPrefix, smallestSuffix] = chars.reduce(([sp, ss], current, i) => {
-        const next = i < chars.length - 1 ? chars[i + 1] : chars[0];
-        const p = prefix(current, next);
-        const s = suffix(current, next);
-        return [p < sp ? p : sp, s < ss ? s : ss];
-    }, [Number.MAX_VALUE, Number.MAX_VALUE]);
+    const [smallestPrefix, smallestSuffix] = chars.reduce(
+        ([sp, ss], current, i) => {
+            const next = i < chars.length - 1 ? chars[i + 1] : chars[0];
+            const p = prefix(current, next);
+            const s = suffix(current, next);
+            return [p < sp ? p : sp, s < ss ? s : ss];
+        },
+        [Number.MAX_VALUE, Number.MAX_VALUE]
+    );
 
-    return chars.map((current) => {
-        return current.slice(smallestPrefix, smallestSuffix ? -smallestSuffix : undefined).join('')
+    return chars.map(current => {
+        return current.slice(smallestPrefix, smallestSuffix ? -smallestSuffix : undefined).join('');
     });
 }
 
-
-export function removeUnicodeMarkers(value:string):string{
+export function removeUnicodeMarkers(value: string): string {
     return value.replace(/[\u200E\u200F]/g, '');
 }
 
-export function characters(value:string):string[] {
+export function characters(value: string): string[] {
     return split(removeUnicodeMarkers(value));
 }
 
-function split(value:string):string[] {
-    if(typeof Symbol === "function" && value[Symbol.iterator]) return [...value];
+function split(value: string): string[] {
+    if (typeof Symbol === 'function' && value[Symbol.iterator]) return [...value];
     return splitByRegex(value);
 }
 
-const splitter = /(?=(?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]))/;
-export function splitByRegex(value: string):string[] {
-    return value.split(splitter)
+const splitter =
+    /(?=(?:[\0-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]))/;
+export function splitByRegex(value: string): string[] {
+    return value.split(splitter);
 }

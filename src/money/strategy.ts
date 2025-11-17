@@ -1,7 +1,7 @@
-import {Datum, MatchStrategy} from "../dates";
-import {PrefixTree} from "../trie";
-import {unique} from "../arrays";
-import {PreferredCurrencies} from "./preferred-currencies";
+import {Datum, MatchStrategy} from '../dates';
+import {PrefixTree} from '../trie';
+import {unique} from '../arrays';
+import {PreferredCurrencies} from './preferred-currencies';
 
 export function prefer<V>(value: undefined): undefined;
 export function prefer<V>(...values: V[]): MatchStrategy<V>;

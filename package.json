@@ -1,22 +1,59 @@
 {
-  "devDependencies": {
-    "@types/benchmark": "^1.0.33",
-    "@types/chai": "^4.3.3",
-    "@types/libxmljs": "^0.18.8",
-    "@types/mocha": "^9.1.1",
-    "@types/node-fetch": "^2.6.2",
-    "@types/wikidata-sdk": "^5.15.1",
-    "@types/xmldom": "^0.1.31",
-    "benchmark": "^2.1.4",
-    "chai": "^4.3.6",
-    "esbuild": "^0.14.54",
-    "esbuild-runner": "^2.2.1",
-    "madge": "^5.0.1",
-    "mocha": "^9.2.2",
-    "node-fetch": "^3.2.10",
-    "typescript": "^4.8.4",
-    "wikidata-sdk": "^7.14.4",
-    "xmldom": "^0.6.0",
-    "xpath": "^0.0.32"
-  }
+    "name": "@triptease/localised-parsing",
+    "version": "0.0.0",
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com:bodar/totallylazy.js.git"
+    },
+    "author": "Daniel Worthington-Bodart <dan@bodar.com>",
+    "license": "Apache-2.0",
+    "private": false,
+    "bugs": {
+        "url": "https://github.com/bodar/totallylazy/issues"
+    },
+    "homepage": "https://github.com/bodar/totallylazy",
+    "scripts": {
+        "circular": "madge --extensions ts --circular .",
+        "generate": "esr money/generate-currencies.ts",
+        "perf": "esr perf/trie.ts",
+        "clean": "find . -type f \\( -name '*.js' -o -name '*.js.map' -o -name '*.d.ts' \\) -not -path '*/node_modules/*' -not -path '*/dist/*' -delete",
+        "prepublishOnly": "mkdir -p ./dist && sed \"s/0\\.0\\.0/${VERSION}/g\" package.json > ./dist/package.json; cp -r ./README.md ./src ./dist/",
+        "postpublish": "rm -r ./dist/",
+        "test": "NODE_ENV=development NODE_ICU_DATA=./node_modules/full-icu TZ='America/Los_Angeles' mocha 'test/**/*.test.ts'",
+        "artifactregistry-login": "npx google-artifactregistry-auth"
+    },
+    "publishConfig": {
+        "directory": "./dist",
+        "access": "public",
+        "registry": "https://us-east1-npm.pkg.dev/triptease-onboard/localised-parsing/"
+    },
+    "dependencies": {
+        "tslib": "^2.4.0"
+    },
+    "devDependencies": {
+        "@types/benchmark": "^1.0.33",
+        "@types/chai": "^4.3.3",
+        "@types/libxmljs": "^0.18.8",
+        "@types/mocha": "^9.1.1",
+        "@types/node-fetch": "^2.6.2",
+        "@types/wikidata-sdk": "^5.15.1",
+        "@types/xmldom": "^0.1.31",
+        "benchmark": "^2.1.4",
+        "chai": "^4.3.6",
+        "esbuild": "^0.14.54",
+        "esbuild-runner": "^2.2.1",
+        "madge": "^5.0.1",
+        "mocha": "^9.2.2",
+        "node-fetch": "^3.2.10",
+        "prettier": "^3.6.2",
+        "typescript": "^4.8.4",
+        "wikidata-sdk": "^7.14.4",
+        "xmldom": "^0.6.0",
+        "xpath": "^0.0.32"
+    },
+    "optionalDependencies": {
+        "@types/node": "^13.13.52",
+        "full-icu": "^1.5.0",
+        "http-shutdown": "^1.2.2"
+    }
 }

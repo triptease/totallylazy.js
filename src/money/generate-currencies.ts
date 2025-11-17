@@ -1,17 +1,20 @@
-import {select} from "xpath";
-import {DOMParser} from "xmldom";
-import fetch from "node-fetch";
-import {File} from "../files";
+import {select} from 'xpath';
+import {DOMParser} from 'xmldom';
+import fetch from 'node-fetch';
+import {File} from '../files';
 import {simplify, sparqlQuery} from 'wikidata-sdk';
-import {additionalSymbols, Currency, CurrencySymbol} from "./currencies-def";
+import {additionalSymbols, Currency, CurrencySymbol} from './currencies-def';
 
 (async () => {
     const symbols = await getSymbols();
-    const currencies = symbols.reduce((c, s) => {
-        const currency = c[s.iso] || {symbols: [], decimals: 2};
-        if (!currency.symbols.includes(s.symbol)) currency.symbols.push(s.symbol);
-        return c;
-    }, await getCurrencies());
+    const currencies = symbols.reduce(
+        (c, s) => {
+            const currency = c[s.iso] || {symbols: [], decimals: 2};
+            if (!currency.symbols.includes(s.symbol)) currency.symbols.push(s.symbol);
+            return c;
+        },
+        await getCurrencies()
+    );
 
     const allCurrencies = additionalSymbols.reduce((c, s) => {
         const currency = c[s.iso] || {symbols: [], decimals: 2};
@@ -38,7 +41,7 @@ async function getCurrencies(): Promise<Currencies> {
         if (!currency || !decimalPlaces) return a;
         a[currency] = {
             decimals: decimalPlaces === 'N.A.' ? 0 : Number(decimalPlaces),
-            symbols: []
+            symbols: [],
         };
         return a;
     }, {} as Currencies);
@@ -47,7 +50,6 @@ async function getCurrencies(): Promise<Currencies> {
 export interface Currencies {
     [code: string]: Currency;
 }
-
 
 async function getSymbols(): Promise<CurrencySymbol[]> {
     const query = sparqlQuery(`SELECT DISTINCT ?iso ?symbol WHERE {

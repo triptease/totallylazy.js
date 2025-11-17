@@ -1,13 +1,12 @@
-import {lazy} from "./lazy";
-import {characters} from "./characters";
-import {ascending, Comparator} from "./collections";
-import {AVLTree} from "./avltree";
-import {sequence} from "./sequence";
-import {flatMap, map, reduce, single} from "./transducers";
+import {lazy} from './lazy';
+import {characters} from './characters';
+import {ascending, Comparator} from './collections';
+import {AVLTree} from './avltree';
+import {sequence} from './sequence';
+import {flatMap, map, reduce, single} from './transducers';
 
 export class TrieFactory<K, V> {
-    constructor(public readonly comparator: Comparator<K> = ascending) {
-    }
+    constructor(public readonly comparator: Comparator<K> = ascending) {}
 
     @lazy get avlTree(): AVLTree<K, Trie<K, V>> {
         return AVLTree.empty(this.comparator);
@@ -29,10 +28,11 @@ export class TrieFactory<K, V> {
 }
 
 export class Trie<K, V> {
-    constructor(public readonly factory: TrieFactory<K, V> = new TrieFactory<K, V>(),
-                public readonly value?: V,
-                public readonly children: AVLTree<K, Trie<K, V>> = factory.avlTree) {
-    }
+    constructor(
+        public readonly factory: TrieFactory<K, V> = new TrieFactory<K, V>(),
+        public readonly value?: V,
+        public readonly children: AVLTree<K, Trie<K, V>> = factory.avlTree
+    ) {}
 
     contains(key: K[]): boolean {
         return !!this.lookup(key);
@@ -52,7 +52,10 @@ export class Trie<K, V> {
     match(key: K[]): V[] {
         if (key.length == 0) {
             const seed: V[] = this.value ? [this.value] : [];
-            return single(this.children.values(), reduce((a, t) => a.concat(t.match(key)), seed));
+            return single(
+                this.children.values(),
+                reduce((a, t) => a.concat(t.match(key)), seed)
+            );
         }
         const [head, ...tail] = key;
         const child = this.children.lookup(head);
@@ -84,22 +87,34 @@ export class Trie<K, V> {
         }
 
         function recurseChildren<K, V>(trie: Trie<K, V>, prefix: K[]) {
-            return sequence(trie.children.entries(), flatMap(entry => recurse(prefix, entry)));
+            return sequence(
+                trie.children.entries(),
+                flatMap(entry => recurse(prefix, entry))
+            );
         }
 
         return recurseChildren(this, []);
     }
 
     keys(): Iterable<K[]> {
-        return sequence(this.entries(), map(([key]) => key));
+        return sequence(
+            this.entries(),
+            map(([key]) => key)
+        );
     }
 
     values(): Iterable<V> {
-        return sequence(this.entries(), map(([, value]) => value));
+        return sequence(
+            this.entries(),
+            map(([, value]) => value)
+        );
     }
 
     @lazy get height(): number {
-        return single(this.children.values(), reduce((a, c) => Math.max(a, c.height + 1), 0));
+        return single(
+            this.children.values(),
+            reduce((a, c) => Math.max(a, c.height + 1), 0)
+        );
     }
 
     toString() {
@@ -118,10 +133,11 @@ const IntlComparator = new Intl.Collator(undefined, {usage: 'sort', sensitivity:
 export const DEFAULT_COMPARATOR = IntlComparator;
 
 export class PrefixTree<V = string> {
-    constructor(private converter = characters,
-                private comparator: Comparator<string> = DEFAULT_COMPARATOR,
-                private trie = new Trie<string, V>(new TrieFactory<string, V>(comparator))) {
-    }
+    constructor(
+        private converter = characters,
+        private comparator: Comparator<string> = DEFAULT_COMPARATOR,
+        private trie = new Trie<string, V>(new TrieFactory<string, V>(comparator))
+    ) {}
 
     contains(value: string): boolean {
         return !!this.lookup(value);
@@ -145,19 +161,32 @@ export class PrefixTree<V = string> {
     }
 
     delete(value: string): PrefixTree<V> {
-        return new PrefixTree(this.converter, this.comparator, this.trie.insert(this.converter(value), undefined as any));
+        return new PrefixTree(
+            this.converter,
+            this.comparator,
+            this.trie.insert(this.converter(value), undefined as any)
+        );
     }
 
     entries(): Iterable<Pair<string, V>> {
-        return sequence(this.trie.entries(), map(([chars, value]) => pair(chars.join(''), value)));
+        return sequence(
+            this.trie.entries(),
+            map(([chars, value]) => pair(chars.join(''), value))
+        );
     }
 
     keys(): Iterable<string> {
-        return sequence(this.entries(), map(([key]) => key));
+        return sequence(
+            this.entries(),
+            map(([key]) => key)
+        );
     }
 
     values(): Iterable<V> {
-        return sequence(this.entries(), map(([, value]) => value));
+        return sequence(
+            this.entries(),
+            map(([, value]) => value)
+        );
     }
 
     @lazy get height(): number {
@@ -167,10 +196,13 @@ export class PrefixTree<V = string> {
     search(key: string, maxDist: number): Result<V>[] {
         const empty = Row.create(this.converter(key), this.comparator);
 
-        return single(this.trie.children.entries(), reduce((a: Result<V>[], [letter, value]) => {
-            return a.concat(recurse(value, letter, empty, maxDist));
-        }, [] as Result<V>[]));
-    };
+        return single(
+            this.trie.children.entries(),
+            reduce((a: Result<V>[], [letter, value]) => {
+                return a.concat(recurse(value, letter, empty, maxDist));
+            }, [] as Result<V>[])
+        );
+    }
 }
 
 function recurse<V>(trie: Trie<string, V>, letter: string, previousRow: Row, maxDist: number): Result<V>[] {
@@ -183,18 +215,23 @@ function recurse<V>(trie: Trie<string, V>, letter: string, previousRow: Row, max
     }
 
     if (currentRow.minimal <= maxDist) {
-        return single(trie.children.entries(), reduce((a, [letter, value]) => {
-            return a.concat(recurse(value, letter, currentRow, maxDist));
-        }, result));
+        return single(
+            trie.children.entries(),
+            reduce((a, [letter, value]) => {
+                return a.concat(recurse(value, letter, currentRow, maxDist));
+            }, result)
+        );
     }
 
     return result;
 }
 
-
 export class Row<K = string> {
-    private constructor(public keys: K[], public values: number[], private comparator: Comparator<K>) {
-    }
+    private constructor(
+        public keys: K[],
+        public values: number[],
+        private comparator: Comparator<K>
+    ) {}
 
     static create<K>(keys: K[], comparator: Comparator<K>): Row<K> {
         const result: number[] = [];
@@ -205,12 +242,16 @@ export class Row<K = string> {
     }
 
     next(key: K): Row<K> {
-        const values = this.keys.reduce((result, search, column) => {
-            result[column + 1] = this.comparator(search, key) === 0 ?
-                this.values[column] :
-                1 + Math.min(result[column], this.values[column], this.values[column + 1]);
-            return result;
-        }, [this.values[0] + 1]);
+        const values = this.keys.reduce(
+            (result, search, column) => {
+                result[column + 1] =
+                    this.comparator(search, key) === 0
+                        ? this.values[column]
+                        : 1 + Math.min(result[column], this.values[column], this.values[column + 1]);
+                return result;
+            },
+            [this.values[0] + 1]
+        );
 
         return new Row(this.keys, values, this.comparator);
     }
@@ -228,4 +269,3 @@ export interface Result<V = string> {
     value: V;
     distance: number;
 }
-

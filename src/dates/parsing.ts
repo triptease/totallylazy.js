@@ -1,38 +1,35 @@
-import {flatMap, zip} from "../transducers";
-import {Clock, SystemClock} from "./clock";
-import {range} from "../sequence";
-import {array} from "../array";
-import {date, DateFactory, DateFactoryParts, Days, Month, Options, weekdayOf, yearOf} from "./core";
-import {mapIgnoreError, parser} from "./formatting";
+import {flatMap, zip} from '../transducers';
+import {Clock, SystemClock} from './clock';
+import {range} from '../sequence';
+import {array} from '../array';
+import {date, DateFactory, DateFactoryParts, Days, Month, Options, weekdayOf, yearOf} from './core';
+import {mapIgnoreError, parser} from './formatting';
 
 export function parse(value: string, locale: string, options?: string | Options): Date {
     return parser(locale, options).parse(value);
 }
 
 class CompositeDateFactory implements DateFactory {
-    constructor(private factories: DateFactory[]) {
-    }
+    constructor(private factories: DateFactory[]) {}
 
     create(parts: DateFactoryParts): Date {
         for (const factory of this.factories) {
             try {
                 return factory.create(parts);
-            } catch (e) {
-            }
+            } catch (e) {}
         }
         throw new Error(`Unable to create date for ${JSON.stringify(parts)}`);
     }
 }
 
 export function compositeDateFactory(...factories: DateFactory[]): DateFactory {
-    return new CompositeDateFactory(factories)
+    return new CompositeDateFactory(factories);
 }
 
 export class InferYearViaWeekday implements DateFactory {
-    private constructor(private clock: Clock) {
-    }
+    private constructor(private clock: Clock) {}
 
-    static create(clock:Clock = new SystemClock()): DateFactory {
+    static create(clock: Clock = new SystemClock()): DateFactory {
         return new InferYearViaWeekday(clock);
     }
 
@@ -52,7 +49,8 @@ export class InferYearViaWeekday implements DateFactory {
             range(0, -6),
             zip(range(1, 6)),
             flatMap(a => a),
-            mapIgnoreError(inc => date(yearOf(now) + inc, month, day)));
+            mapIgnoreError(inc => date(yearOf(now) + inc, month, day))
+        );
     }
 }
 
@@ -64,7 +62,10 @@ export enum InferDirection {
 export class InferYear implements DateFactory {
     private readonly date: Date;
 
-    private constructor(date: Date, private direction: InferDirection) {
+    private constructor(
+        date: Date,
+        private direction: InferDirection
+    ) {
         this.date = Days.startOf(date);
     }
 
@@ -93,8 +94,8 @@ export class InferYear implements DateFactory {
         if (this.direction == InferDirection.After && candidate > this.date) return candidate;
 
         const yearIncrement = this.calculateYearIncrement(year);
-        candidate.setUTCFullYear(candidate.getUTCFullYear() + (yearIncrement * this.direction));
-        return candidate
+        candidate.setUTCFullYear(candidate.getUTCFullYear() + yearIncrement * this.direction);
+        return candidate;
     }
 
     private calculateYearIncrement(year: number | undefined) {
@@ -113,7 +114,7 @@ export class Pivot {
      * @deprecated Please use InferYear.before
      */
     static on(pivotYear: number): DateFactory {
-        return InferYear.before(date(pivotYear, 1, 1))
+        return InferYear.before(date(pivotYear, 1, 1));
     }
 
     /***
@@ -128,15 +129,12 @@ export class Pivot {
  * @deprecated Please use InferYear
  */
 export class SmartDate implements DateFactory {
-    constructor(private clock: Clock = new SystemClock()) {
-    }
+    constructor(private clock: Clock = new SystemClock()) {}
 
     create(parts: DateFactoryParts): Date {
-        if (typeof parts.year === "undefined") {
+        if (typeof parts.year === 'undefined') {
             return InferYear.after(this.clock.now()).create(parts);
         }
         return InferYear.sliding(this.clock).create(parts);
     }
 }
-
-

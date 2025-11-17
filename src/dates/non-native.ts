@@ -1,12 +1,12 @@
-import {date, defaultOptions, Month, Options, PatternParser, Weekday} from "./core";
-import {different, isNamedMatch, NamedRegExp, replace} from "../characters";
-import {cache} from "../cache";
-import {lazy} from "../lazy";
-import {DateFormatter, Formatters, StringDateFormatter} from "./format";
-import {array} from "../array";
-import {map} from "../transducers";
-import {numberFormatter, Numerals, Weekdays} from "./datum";
-import {MonthsBuilder, weekdays, WeekdaysBuilder} from "./builders";
+import {date, defaultOptions, Month, Options, PatternParser, Weekday} from './core';
+import {different, isNamedMatch, NamedRegExp, replace} from '../characters';
+import {cache} from '../cache';
+import {lazy} from '../lazy';
+import {DateFormatter, Formatters, StringDateFormatter} from './format';
+import {array} from '../array';
+import {map} from '../transducers';
+import {numberFormatter, Numerals, Weekdays} from './datum';
+import {MonthsBuilder, weekdays, WeekdaysBuilder} from './builders';
 import DateTimeFormatPart = Intl.DateTimeFormatPart;
 import DateTimeFormatPartTypes = Intl.DateTimeFormatPartTypes;
 
@@ -15,11 +15,12 @@ export interface DataExtractor {
 }
 
 export class BaseDataExtractor {
-    constructor(protected locale: string,
-                protected options: Options,
-                protected dates: Date[],
-                protected partType: DateTimeFormatPartTypes) {
-    }
+    constructor(
+        protected locale: string,
+        protected options: Options,
+        protected dates: Date[],
+        protected partType: DateTimeFormatPartTypes
+    ) {}
 }
 
 export function exactFormat(locale: string, options: Options, dates: Date[]): string[] {
@@ -32,14 +33,20 @@ export abstract class FromFormatStringDataExtractor extends BaseDataExtractor im
         const exact = Object.keys(this.options).length == 1;
         const fullFormats = exactFormat(this.locale, this.options, this.dates);
         if (exact) return fullFormats;
-        const simpleFormats = exactFormat(this.locale, {[this.partType]: (this.options as any)[this.partType]} as any, this.dates);
+        const simpleFormats = exactFormat(
+            this.locale,
+            {[this.partType]: (this.options as any)[this.partType]} as any,
+            this.dates
+        );
         const diffs = this.diff(fullFormats);
         const result = [];
         for (let i = 0; i < simpleFormats.length; i++) {
             const full = fullFormats[i];
             const simple = simpleFormats[i];
             const diff = diffs[i];
-            result.push(full.indexOf(simple) != -1 && simple.length > diff.length && isNaN(parseInt(diff)) ? simple : diff);
+            result.push(
+                full.indexOf(simple) != -1 && simple.length > diff.length && isNaN(parseInt(diff)) ? simple : diff
+            );
         }
 
         return result;
@@ -84,7 +91,7 @@ export class FromFormatStringMonthExtractor extends FromFormatStringDataExtracto
             if (delimiter === '年') return `${number}year`;
             if (delimiter === '月') return `${number}month`;
             if (delimiter === '日') return `${number}day`;
-            throw new Error(`Unknown delimiter ${delimiter}`)
+            throw new Error(`Unknown delimiter ${delimiter}`);
         });
     }
 
@@ -96,7 +103,7 @@ export class FromFormatStringMonthExtractor extends FromFormatStringDataExtracto
             if (delimiter === 'year') return '年';
             if (delimiter === 'month') return '月';
             if (delimiter === 'day') return '日';
-            throw new Error(`Unknown delimiter ${delimiter}`)
+            throw new Error(`Unknown delimiter ${delimiter}`);
         });
     }
 
@@ -131,14 +138,15 @@ export class FromFormatStringWeekdayExtractor extends FromFormatStringDataExtrac
 }
 
 export class LearningDateFormatter implements DateFormatter {
-    private constructor(private locale: string,
-                        private options: Options = defaultOptions,
-                        private yearValue = 3333,
-                        private monthValue = 11,
-                        private dayValue = 20,
-                        private weekdayValue = Weekday.Friday,
-                        private numerals = Numerals.get(locale)) {
-    }
+    private constructor(
+        private locale: string,
+        private options: Options = defaultOptions,
+        private yearValue = 3333,
+        private monthValue = 11,
+        private dayValue = 20,
+        private weekdayValue = Weekday.Friday,
+        private numerals = Numerals.get(locale)
+    ) {}
 
     @cache
     static create(locale: string, options: Options = defaultOptions): LearningDateFormatter {
@@ -180,7 +188,7 @@ export class LearningDateFormatter implements DateFormatter {
     @lazy get learningNamesPattern(): NamedRegExp {
         const template = (key: string) => `(?<${key}>${(this as any)[key]})`;
         const patterns = Object.keys(this.options).map(k => template(k));
-        const namedPattern = `(?:${patterns.join("|")})`;
+        const namedPattern = `(?:${patterns.join('|')})`;
         return NamedRegExp.create(namedPattern);
     }
 
@@ -188,20 +196,23 @@ export class LearningDateFormatter implements DateFormatter {
         const numbers = Numerals.get(this.locale).pattern;
         const learningRegex = this.learningNamesPattern;
 
-        const result = array(learningRegex.iterate(this.formatted), map(value => {
-            if (isNamedMatch(value)) {
-                let [type] = value.filter(n => Boolean(n.value)).map(n => n.name);
-                if (!type) throw new Error();
-                if (type == 'year') return `(?<year>[${numbers}]{4})`;
-                else if (type == "day") return `(?<day>[${numbers}]{1,2})`;
-                else if (type == "month") return `(?<month>(?:[${numbers}]{1,2}|${this.months.pattern}))`;
-                else if (type == "weekday") return `(?<weekday>${this.weekdays.pattern})`;
-            } else {
-                return `(?<literal>[${value}]+?)`;
-            }
-        }));
+        const result = array(
+            learningRegex.iterate(this.formatted),
+            map(value => {
+                if (isNamedMatch(value)) {
+                    let [type] = value.filter(n => Boolean(n.value)).map(n => n.name);
+                    if (!type) throw new Error();
+                    if (type == 'year') return `(?<year>[${numbers}]{4})`;
+                    else if (type == 'day') return `(?<day>[${numbers}]{1,2})`;
+                    else if (type == 'month') return `(?<month>(?:[${numbers}]{1,2}|${this.months.pattern}))`;
+                    else if (type == 'weekday') return `(?<weekday>${this.weekdays.pattern})`;
+                } else {
+                    return `(?<literal>[${value}]+?)`;
+                }
+            })
+        );
 
-        const pattern = "^" + result.join("") + "$";
+        const pattern = '^' + result.join('') + '$';
         return NamedRegExp.create(pattern);
     }
 
@@ -229,11 +240,11 @@ export class LearningDateFormatter implements DateFormatter {
     private collapseLiterals(parts: DateTimeFormatPart[]): DateTimeFormatPart[] {
         for (let i = 0; i < parts.length; i++) {
             const current = parts[i];
-            if (current.type === "literal") {
+            if (current.type === 'literal') {
                 let position = i + 1;
                 while (true) {
                     const next = parts[position];
-                    if (!(next && next.type === "literal")) break;
+                    if (!(next && next.type === 'literal')) break;
                     current.value = current.value + next.value;
                     parts.splice(position, 1);
                 }
@@ -244,8 +255,8 @@ export class LearningDateFormatter implements DateFormatter {
 
     private getType(type: string, value: string): DateTimeFormatPartTypes {
         if (type === 'month' || type === 'weekday') {
-            if (this.parsable(this.months, value)) return "month";
-            if (this.parsable(this.weekdays, value)) return "weekday";
+            if (this.parsable(this.months, value)) return 'month';
+            if (this.parsable(this.weekdays, value)) return 'weekday';
             return 'literal';
         }
         return type as any;

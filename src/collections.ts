@@ -20,15 +20,15 @@ export function comparators<T>(...comparators: Comparator<T>[]): Comparator<T> {
             if (result != 0) return result;
         }
         return 0;
-    }
+    };
 }
 
 export interface Key<A, K extends keyof A> extends Mapper<A, A[K]> {
-    name: K
+    name: K;
 }
 
 export function key<A, K extends keyof A>(name: K): Key<A, K> {
-    return Object.assign((a: A) => a[name], {name})
+    return Object.assign((a: A) => a[name], {name});
 }
 
 export function value<A, K extends keyof A>(name: K): Mapper<A, A[K]> {
@@ -66,10 +66,10 @@ export async function* asyncIterable<T>(values: Array<Promise<T> | T> | Iterable
 }
 
 export function isArrayLike(value: any): value is ArrayLike<any> {
-    return typeof value === "object" && typeof value['length'] === "number";
+    return typeof value === 'object' && typeof value['length'] === 'number';
 }
 
-export type IterableLike<T> = Iterable<T> | ArrayLike<T>
+export type IterableLike<T> = Iterable<T> | ArrayLike<T>;
 
 export async function* toAsyncIterable<A>(promise: PromiseLike<A>): AsyncIterable<A> {
     yield promise;
@@ -78,22 +78,21 @@ export async function* toAsyncIterable<A>(promise: PromiseLike<A>): AsyncIterabl
 export function by<A, K extends keyof A>(key: K, comparator?: Comparator<A[K]>): Comparator<A>;
 export function by<A, K>(mapper: Mapper<A, K>, comparator?: Comparator<K>): Comparator<A>;
 export function by(mapperOfKey: any, comparator: Comparator<any> = ascending): Comparator<any> {
-    if (typeof mapperOfKey === "function") return byFn(mapperOfKey, comparator);
+    if (typeof mapperOfKey === 'function') return byFn(mapperOfKey, comparator);
     return byKey(mapperOfKey, comparator);
 }
 
 function byKey<A, K extends keyof A>(key: K, comparator: Comparator<A[K]> = ascending): Comparator<A> {
     return (a: A, b: A) => {
         return comparator(a[key], b[key]);
-    }
+    };
 }
 
 function byFn<A, K>(mapper: Mapper<A, K>, comparator: Comparator<K> = ascending): Comparator<A> {
     return (a: A, b: A) => {
         return comparator(mapper(a), mapper(b));
-    }
+    };
 }
-
 
 type StateHandler = [Function, Function];
 type IteratorState<T, R = any> = IteratorResult<T, R> | Error;
@@ -140,7 +139,7 @@ export class AsyncIteratorHandler<T, R = any> implements AsyncIterableWithReturn
 
     private newHandler(newHandler: StateHandler) {
         const state = this.state.shift();
-        if (typeof state === 'undefined') return this.handlers.push(newHandler)
+        if (typeof state === 'undefined') return this.handlers.push(newHandler);
         const oldHandler = this.handlers.shift();
         if (typeof oldHandler === 'undefined') return this.consume(state, newHandler);
         this.consume(state, oldHandler);
@@ -158,11 +157,11 @@ export type Returned<R> = {returned: R};
 export type ReturnedResult<T, R> = Yielded<T> | Returned<R>;
 
 export function isYielded<T>(value: any): value is Yielded<T> {
-    return value && typeof value === "object" && 'yielded' in value;
+    return value && typeof value === 'object' && 'yielded' in value;
 }
 
 export function isReturned<R>(value: any): value is Returned<R> {
-    return value && typeof value === "object" && 'returned' in value;
+    return value && typeof value === 'object' && 'returned' in value;
 }
 
 export async function* asyncReturned<T, R>(iterator: AsyncIterator<T, R>): AsyncIterableIterator<ReturnedResult<T, R>> {
@@ -172,7 +171,7 @@ export async function* asyncReturned<T, R>(iterator: AsyncIterator<T, R>): Async
             yield {returned: value as R};
             break;
         } else {
-            yield {yielded: value as T}
+            yield {yielded: value as T};
         }
     }
 }
@@ -184,8 +183,7 @@ export function* syncReturned<T, R>(iterator: Iterator<T, R>): IterableIterator<
             yield {returned: value as R};
             break;
         } else {
-            yield {yielded: value as T}
+            yield {yielded: value as T};
         }
     }
 }
-

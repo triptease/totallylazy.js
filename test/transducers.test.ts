@@ -1,128 +1,149 @@
-import { assert } from 'chai';
-import { range, repeat } from "../src/sequence";
-import { sum } from "../src/numbers";
-import { ascending, by, Comparator, comparators, descending } from "../src/collections";
-import { characters } from "../src/characters";
-import {array} from "../src/array";
-import {first} from "../src/transducers/first";
-import {last} from "../src/transducers/last";
-import {map} from "../src/transducers/map";
-import {zip, zipWithIndex} from "../src/transducers/zip";
-import {filter} from "../src/transducers/filter";
-import {find} from "../src/transducers/find";
-import {scan} from "../src/transducers/scan";
-import {take} from "../src/transducers/take";
-import {drop} from "../src/transducers/drop";
-import {sort} from "../src/transducers/sort";
-import {unique} from "../src/transducers/unique";
-import {windowed} from "../src/transducers/windowed";
-import {reduce} from "../src/transducers/reduce";
-import {dropWhile} from "../src/transducers/dropWhile";
-import {reject} from "../src/transducers/reject";
-import {takeWhile} from "../src/transducers/takeWhile";
-import {dedupe} from "../src/transducers/dedupe";
-import {assertSync} from "./asserts";
+import {assert} from 'chai';
+import {range, repeat} from '../src/sequence';
+import {sum} from '../src/numbers';
+import {ascending, by, Comparator, comparators, descending} from '../src/collections';
+import {characters} from '../src/characters';
+import {array} from '../src/array';
+import {first} from '../src/transducers/first';
+import {last} from '../src/transducers/last';
+import {map} from '../src/transducers/map';
+import {zip, zipWithIndex} from '../src/transducers/zip';
+import {filter} from '../src/transducers/filter';
+import {find} from '../src/transducers/find';
+import {scan} from '../src/transducers/scan';
+import {take} from '../src/transducers/take';
+import {drop} from '../src/transducers/drop';
+import {sort} from '../src/transducers/sort';
+import {unique} from '../src/transducers/unique';
+import {windowed} from '../src/transducers/windowed';
+import {reduce} from '../src/transducers/reduce';
+import {dropWhile} from '../src/transducers/dropWhile';
+import {reject} from '../src/transducers/reject';
+import {takeWhile} from '../src/transducers/takeWhile';
+import {dedupe} from '../src/transducers/dedupe';
+import {assertSync} from './asserts';
 
-
-describe("Transducer", () => {
-    it("can drop", () => {
+describe('Transducer', () => {
+    it('can drop', () => {
         assertSync(drop(2).sync([1, 2, 3]), 3);
         assertSync(drop(4).sync([1, 2, 3]), ...[]);
     });
 
-    it("can dropWhile", () => {
-        assertSync(dropWhile<number>((a) => a <= 2).sync([1, 2, 3, 2, 1]), 3, 2, 1);
-        assertSync(dropWhile<number>((a) => a < 4).sync([1, 2, 3, 2, 1]), ...[]);
+    it('can dropWhile', () => {
+        assertSync(dropWhile<number>(a => a <= 2).sync([1, 2, 3, 2, 1]), 3, 2, 1);
+        assertSync(dropWhile<number>(a => a < 4).sync([1, 2, 3, 2, 1]), ...[]);
     });
 
-    it("can zip", () => {
+    it('can zip', () => {
         assertSync(zip(['a', 'b', 'c']).sync([1, 2]), [1, 'a'], [2, 'b']);
     });
 
-    it("can zip with index", () => {
+    it('can zip with index', () => {
         assertSync(zipWithIndex().sync(['a', 'b']), ['a', 0], ['b', 1]);
     });
 
-    it("can map", () => {
-        assertSync(map<number, string>(n => n.toString()).sync([2]), "2");
+    it('can map', () => {
+        assertSync(map<number, string>(n => n.toString()).sync([2]), '2');
     });
 
-    it("can filter", () => {
+    it('can filter', () => {
         assertSync(filter<number>(n => n % 2 == 0).sync([0, 1, 2, 3, 4]), 0, 2, 4);
     });
 
-    it("can reject", () => {
+    it('can reject', () => {
         assertSync(reject<number>(n => n % 2 == 0).sync([0, 1, 2, 3, 4]), 1, 3);
     });
 
-    it("supports first", () => {
+    it('supports first', () => {
         assertSync(first().sync([]));
         assertSync(first().sync([0, 1, 2, 3, 4]), 0);
     });
 
-    it("supports last", () => {
+    it('supports last', () => {
         assertSync(last().sync([]));
         assertSync(last().sync([0, 1, 2, 3, 4]), 4);
     });
 
-    it("can find", () => {
+    it('can find', () => {
         assertSync(find<number>(n => n > 2).sync([0, 1, 2, 3, 4]), 3);
         assertSync(find<number>(n => n > 2).sync([]));
     });
 
-    it("can scan", () => {
+    it('can scan', () => {
         assertSync(scan(sum, 0).sync([]), 0);
         assertSync(scan(sum, 0).sync([2]), 0, 2);
         assertSync(scan(sum, 0).sync([2, 4, 6]), 0, 2, 6, 12);
     });
 
-    it("can reduce", () => {
+    it('can reduce', () => {
         assertSync(reduce(sum, 0).sync([]), 0);
         assertSync(reduce(sum, 0).sync([2]), 2);
         assertSync(reduce(sum, 0).sync([2, 4, 6]), 12);
     });
 
-    it("can take", () => {
+    it('can take', () => {
         assertSync(take(4).sync([0, 1, 2, 3, 4, 5, 6, 7, 8]), 0, 1, 2, 3);
         assertSync(take(4.5).sync([0, 1, 2, 3, 4, 5, 6, 7, 8]), 0, 1, 2, 3);
         assertSync(take(0).sync([0, 1, 2, 3, 4, 5, 6, 7, 8]));
         assertSync(take(-1).sync([0, 1, 2, 3, 4, 5, 6, 7, 8]));
     });
 
-    it("can take while", async () => {
+    it('can take while', async () => {
         assertSync(takeWhile<number>(n => n < 4).sync([0, 1, 2, 3, 4, 5, 6, 7, 8]), 0, 1, 2, 3);
     });
 
-    it("can sort", async () => {
+    it('can sort', async () => {
         assertSync(sort().sync([3, 4, 8, 1, 2, 0, 3, 2, 9]), 0, 1, 2, 2, 3, 3, 4, 8, 9);
         assertSync(sort(ascending).sync([3, 4, 8, 1, 2, 0, 3, 2, 9]), 0, 1, 2, 2, 3, 3, 4, 8, 9);
         assertSync(sort(descending).sync([3, 4, 8, 1, 2, 0, 3, 2, 9]), 9, 8, 4, 3, 3, 2, 2, 1, 0);
     });
 
-    it("supports a sliding window on infinite sequence", function () {
-        assert.deepEqual(array(range(1), windowed(3), take(3)), [[1, 2, 3], [2, 3, 4], [3, 4, 5]]);
+    it('supports a sliding window on infinite sequence', function () {
+        assert.deepEqual(array(range(1), windowed(3), take(3)), [
+            [1, 2, 3],
+            [2, 3, 4],
+            [3, 4, 5],
+        ]);
     });
 
-    it("supports a sliding window on infinite sequence with custom step function", function () {
-        assert.deepEqual(array(range(1), windowed(3, 1), take(3)), [[1, 2, 3], [2, 3, 4], [3, 4, 5]]);
-        assert.deepEqual(array(range(1), windowed(3, 2), take(3)), [[1, 2, 3], [3, 4, 5], [5, 6, 7]]);
-        assert.deepEqual(array(range(1), windowed(3, 3), take(3)), [[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
+    it('supports a sliding window on infinite sequence with custom step function', function () {
+        assert.deepEqual(array(range(1), windowed(3, 1), take(3)), [
+            [1, 2, 3],
+            [2, 3, 4],
+            [3, 4, 5],
+        ]);
+        assert.deepEqual(array(range(1), windowed(3, 2), take(3)), [
+            [1, 2, 3],
+            [3, 4, 5],
+            [5, 6, 7],
+        ]);
+        assert.deepEqual(array(range(1), windowed(3, 3), take(3)), [
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9],
+        ]);
     });
 
-    it("supports a sliding window on infinite sequence with custom step function that is greater than the size", function () {
-        assert.deepEqual(array(range(1), windowed(3, 4), take(3)), [[1, 2, 3], [5, 6, 7], [9, 10, 11]]);
+    it('supports a sliding window on infinite sequence with custom step function that is greater than the size', function () {
+        assert.deepEqual(array(range(1), windowed(3, 4), take(3)), [
+            [1, 2, 3],
+            [5, 6, 7],
+            [9, 10, 11],
+        ]);
     });
 
     class Cat {
-        constructor(public name: string, public age: number) {
-        }
+        constructor(
+            public name: string,
+            public age: number
+        ) {}
     }
 
     const freaky = new Cat('Freaky', 17);
     const fatty = new Cat('Fatty', 18);
     const cats = [freaky, fatty];
 
-    it("can sort by property of object", async () => {
+    it('can sort by property of object', async () => {
         const comparator: Comparator<Cat> = by('name');
         assertSync(sort<Cat>(comparator).sync(cats), fatty, freaky);
         assertSync(sort<Cat>(by('name', ascending)).sync(cats), fatty, freaky);
@@ -133,15 +154,17 @@ describe("Transducer", () => {
         assertSync(sort<Cat>(by(c => c.age, descending)).sync(cats), fatty, freaky);
     });
 
-    it("can sort by a function", async () => {
+    it('can sort by a function', async () => {
         assertSync(sort<Cat>(by(c => c.age, descending)).sync(cats), fatty, freaky);
         assertSync(sort<Cat>(by(c => c.name.length / 2, descending)).sync(cats), freaky, fatty);
     });
 
-    it("can sort by two properties of the same object", async () => {
+    it('can sort by two properties of the same object', async () => {
         class Cat {
-            constructor(public name: string, public age: number) {
-            }
+            constructor(
+                public name: string,
+                public age: number
+            ) {}
         }
 
         const freaky = new Cat('Freaky', 17);
@@ -152,20 +175,24 @@ describe("Transducer", () => {
         assertSync(sort<Cat>(comparators(by('age'), by('name'))).sync(cats), freakyClone, fatty, freaky);
     });
 
-    it("can dedupe consecutive duplicates - works with finite and infinite iterables", async () => {
-        assertSync(dedupe<string>().sync(characters("Leeeeroy")), 'L','e','r','o','y');
+    it('can dedupe consecutive duplicates - works with finite and infinite iterables', async () => {
+        assertSync(dedupe<string>().sync(characters('Leeeeroy')), 'L', 'e', 'r', 'o', 'y');
     });
 
-    it("can get unique elements - only works with finite iterables", async () => {
-        assertSync(unique<string>().sync(characters("Leeeereeeeoy")), 'L','e','r','o','y');
+    it('can get unique elements - only works with finite iterables', async () => {
+        assertSync(unique<string>().sync(characters('Leeeereeeeoy')), 'L', 'e', 'r', 'o', 'y');
     });
 
-    it("supports terminating early with take", async () => {
+    it('supports terminating early with take', async () => {
         let called = false;
-        assertSync(take(0).sync(repeat(() => {
-            called = true;
-            throw new Error();
-        })));
+        assertSync(
+            take(0).sync(
+                repeat(() => {
+                    called = true;
+                    throw new Error();
+                })
+            )
+        );
         assert.equal(called, false);
     });
 

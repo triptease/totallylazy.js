@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      tslib:
+        specifier: ^2.4.0
+        version: 2.4.0
     devDependencies:
       '@types/benchmark':
         specifier: ^1.0.33
@@ -50,6 +54,9 @@ importers:
       node-fetch:
         specifier: ^3.2.10
         version: 3.2.10
+      prettier:
+        specifier: ^3.6.2
+        version: 3.6.2
       typescript:
         specifier: ^4.8.4
         version: 4.8.4
@@ -62,12 +69,6 @@ importers:
       xpath:
         specifier: ^0.0.32
         version: 0.0.32
-
-  src:
-    dependencies:
-      tslib:
-        specifier: ^2.4.0
-        version: 2.4.0
     optionalDependencies:
       '@types/node':
         specifier: ^13.13.52
@@ -78,10 +79,27 @@ importers:
       http-shutdown:
         specifier: ^1.2.2
         version: 1.2.2
+    publishDirectory: ./dist
+
+  src:
+    dependencies:
+      tslib:
+        specifier: ^2.4.0
+        version: 2.4.0
     devDependencies:
       madge:
         specifier: ^5.0.1
         version: 5.0.1
+    optionalDependencies:
+      '@types/node':
+        specifier: ^13.13.52
+        version: 13.13.52
+      full-icu:
+        specifier: ^1.5.0
+        version: 1.5.0
+      http-shutdown:
+        specifier: ^1.2.2
+        version: 1.2.2
     publishDirectory: ../dist
 
   test:
@@ -150,9 +168,6 @@ packages:
 
   '@types/node@13.13.52':
     resolution: {integrity: sha512-s3nugnZumCC//n4moGGe6tkNMyYEdaDBitVjwPxXmR5lnMG5dHePinH2EdxkG3Rh1ghFHHixAG4NJhpJW1rthQ==}
-
-  '@types/node@18.7.23':
-    resolution: {integrity: sha512-DWNcCHolDq0ZKGizjx2DZjR/PqsYwAcYUJmfMWqtVU2MBMG5Mo+xFZrhGId5r/O5HOuMPyQEcM6KUBp5lBZZBg==}
 
   '@types/wikidata-sdk@5.15.1':
     resolution: {integrity: sha512-xGM4C1kujCoXPrFmIEwpz5bROgt81GW/NYyGBae5J55GcWOxX5PLUbR02wlAF7LQnm0mEYG5UwxH2gfylPEHvg==}
@@ -970,6 +985,11 @@ packages:
     resolution: {integrity: sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==}
     engines: {node: '>= 0.8.0'}
 
+  prettier@3.6.2:
+    resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   pretty-ms@7.0.1:
     resolution: {integrity: sha512-973driJZvxiGOQ5ONsFhOF/DtzPMOMtgC11kCpUrPGMTgqp2q/1gwzCquocrN33is0VZ5GFHXZYMM9l6h67v2Q==}
     engines: {node: '>=10'}
@@ -1274,19 +1294,16 @@ snapshots:
 
   '@types/libxmljs@0.18.8':
     dependencies:
-      '@types/node': 18.7.23
+      '@types/node': 13.13.52
 
   '@types/mocha@9.1.1': {}
 
   '@types/node-fetch@2.6.2':
     dependencies:
-      '@types/node': 18.7.23
+      '@types/node': 13.13.52
       form-data: 3.0.1
 
-  '@types/node@13.13.52':
-    optional: true
-
-  '@types/node@18.7.23': {}
+  '@types/node@13.13.52': {}
 
   '@types/wikidata-sdk@5.15.1': {}
 
@@ -2104,6 +2121,8 @@ snapshots:
       - supports-color
 
   prelude-ls@1.1.2: {}
+
+  prettier@3.6.2: {}
 
   pretty-ms@7.0.1:
     dependencies:
