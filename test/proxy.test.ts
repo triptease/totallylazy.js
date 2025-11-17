@@ -1,4 +1,3 @@
-import {assert} from 'chai';
 import {call, on} from '../src/proxy';
 
 describe('proxy', () => {
@@ -20,9 +19,9 @@ describe('proxy', () => {
             }
         }
 
-        assert.deepEqual(call(on(User).firstname().length), ['firstname', [], 'length']);
-        assert.deepEqual(call(on(User).lastname), ['lastname']);
-        assert.deepEqual(call(on(User).fullName), ['fullName']);
-        assert.deepEqual(call((on(User).age = 30)), ['age', 30]);
+        expect(call(on(User).firstname().length)).toEqual(['firstname', [], 'length']);
+        expect(call(on(User).lastname)).toEqual(['lastname']);
+        expect(call(on(User).fullName)).toEqual(['fullName']);
+        expect(call((on(User).age = 30))).toEqual(['age', 30]);
     });
 });

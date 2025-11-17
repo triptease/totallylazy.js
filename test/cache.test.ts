@@ -1,4 +1,3 @@
-import {assert} from 'chai';
 import {cache, caching} from '../src/cache';
 
 describe('cache', () => {
@@ -15,11 +14,11 @@ describe('cache', () => {
         const foo = new Foo();
 
         foo.add(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         foo.add(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         foo.add(1, 3);
-        assert.equal(count, 2);
+        expect(count).toBe(2);
     });
 
     it('also works if the function returns something falsy', () => {
@@ -34,11 +33,11 @@ describe('cache', () => {
         const foo = new Foo();
 
         foo.add(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         foo.add(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         foo.add(1, 3);
-        assert.equal(count, 2);
+        expect(count).toBe(2);
     });
 
     it('also works if the function returns undefined', () => {
@@ -53,11 +52,11 @@ describe('cache', () => {
         const foo = new Foo();
 
         foo.add(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         foo.add(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         foo.add(1, 3);
-        assert.equal(count, 2);
+        expect(count).toBe(2);
     });
 
     it('caching is per instance not per class', () => {
@@ -73,11 +72,11 @@ describe('cache', () => {
         const foo2 = new Foo();
 
         foo1.add(1, 2);
-        assert.equal(foo1.count, 1);
+        expect(foo1.count).toBe(1);
         foo1.add(1, 2);
-        assert.equal(foo1.count, 1);
+        expect(foo1.count).toBe(1);
         foo2.add(1, 2);
-        assert.equal(foo2.count, 1);
+        expect(foo2.count).toBe(1);
     });
 });
 
@@ -90,11 +89,11 @@ describe('caching', () => {
         });
 
         cachingFN(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         cachingFN(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         cachingFN(1, 3);
-        assert.equal(count, 2);
+        expect(count).toBe(2);
     });
 
     it('also works if the function returns something falsy', () => {
@@ -105,11 +104,11 @@ describe('caching', () => {
         });
 
         cachingFN(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         cachingFN(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         cachingFN(1, 3);
-        assert.equal(count, 2);
+        expect(count).toBe(2);
     });
 
     it('also works if the function returns undefined', () => {
@@ -120,10 +119,10 @@ describe('caching', () => {
         });
 
         cachingFN(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         cachingFN(1, 2);
-        assert.equal(count, 1);
+        expect(count).toBe(1);
         cachingFN(1, 3);
-        assert.equal(count, 2);
+        expect(count).toBe(2);
     });
 });

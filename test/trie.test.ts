@@ -1,22 +1,21 @@
-import {assert} from 'chai';
 import {DEFAULT_COMPARATOR, Pair, pair, PrefixTree, Row, Trie, TrieFactory} from '../src/trie';
 import {characters} from '../src/characters';
 import {array} from '../src/array';
 
 describe('Trie', function () {
     it('supports isEmpty', function () {
-        assert.equal(new Trie().isEmpty, true);
-        assert.equal(new Trie().insert(['a'], 'value').isEmpty, false);
+        expect(new Trie().isEmpty).toBe(true);
+        expect(new Trie().insert(['a'], 'value').isEmpty).toBe(false);
     });
 
     it('can construct the tree in place', function () {
-        assert.equal(new TrieFactory().construct(['c', 'a', 't'], 'Mr Magoo').lookup(['c', 'a', 't']), 'Mr Magoo');
+        expect(new TrieFactory().construct(['c', 'a', 't'], 'Mr Magoo').lookup(['c', 'a', 't'])).toBe('Mr Magoo');
     });
 
     it('supports contains', function () {
         const key = ['a'];
-        assert.equal(new Trie().contains(key), false);
-        assert.equal(new Trie().insert(key, 'value').contains(key), true);
+        expect(new Trie().contains(key)).toBe(false);
+        expect(new Trie().insert(key, 'value').contains(key)).toBe(true);
     });
 
     it('supports lookup', function () {
@@ -24,16 +23,16 @@ describe('Trie', function () {
         const valueA = 'valueA';
         const keyB = ['a', 'b'];
         const valueB = 'valueB';
-        assert.equal(new Trie().lookup(keyA), undefined);
-        assert.equal(new Trie().insert(keyA, valueA).lookup(keyA), valueA);
-        assert.equal(new Trie().insert(keyA, valueA).insert(keyB, valueB).lookup(keyB), valueB);
+        expect(new Trie().lookup(keyA)).toBeUndefined();
+        expect(new Trie().insert(keyA, valueA).lookup(keyA)).toBe(valueA);
+        expect(new Trie().insert(keyA, valueA).insert(keyB, valueB).lookup(keyB)).toBe(valueB);
     });
 
     it('can replace an element', function () {
-        assert.equal(new Trie().insert([1], 'old').insert([1], 'new').lookup([1]), 'new');
+        expect(new Trie().insert([1], 'old').insert([1], 'new').lookup([1])).toBe('new');
         const trie = new Trie().insert([1], 'old').insert([1, 2], 'preserves').insert([1], 'new');
-        assert.equal(trie.lookup([1]), 'new');
-        assert.equal(trie.lookup([1, 2]), 'preserves');
+        expect(trie.lookup([1])).toBe('new');
+        expect(trie.lookup([1, 2])).toBe('preserves');
     });
 
     it('supports match', function () {
@@ -41,9 +40,9 @@ describe('Trie', function () {
         const valueA = 'valueA';
         const keyB = ['a', 'b'];
         const valueB = 'valueB';
-        assert.deepEqual(new Trie().match(keyA), []);
-        assert.deepEqual(new Trie().insert(keyA, valueA).match(keyA), [valueA]);
-        assert.deepEqual(new Trie().insert(keyA, valueA).insert(keyB, valueB).match(keyA), [valueA, valueB]);
+        expect(new Trie().match(keyA)).toEqual([]);
+        expect(new Trie().insert(keyA, valueA).match(keyA)).toEqual([valueA]);
+        expect(new Trie().insert(keyA, valueA).insert(keyB, valueB).match(keyA)).toEqual([valueA, valueB]);
     });
 
     it('supports delete', function () {
@@ -52,14 +51,14 @@ describe('Trie', function () {
         const keyB = ['a', 'b'];
         const valueB = 'valueB';
         const trie = new Trie().insert(keyA, valueA).insert(keyB, valueB);
-        assert.deepEqual(trie.match([]), [valueA, valueB]);
-        assert.deepEqual(trie.delete(keyB).match([]), [valueA]);
-        assert.deepEqual(trie.delete(keyA).delete(keyB).match([]), []);
+        expect(trie.match([])).toEqual([valueA, valueB]);
+        expect(trie.delete(keyB).match([])).toEqual([valueA]);
+        expect(trie.delete(keyA).delete(keyB).match([])).toEqual([]);
     });
 
     it('supports entries', function () {
         const trie = new Trie().insert(['a'], 'valueA').insert(['a', 'b'], 'valueB').insert(['c', 'a', 'd'], 'valueC');
-        assert.deepEqual(array(trie.entries()), [
+        expect(array(trie.entries())).toEqual([
             [['a'], 'valueA'],
             [['a', 'b'], 'valueB'],
             [['c', 'a', 'd'], 'valueC'],
@@ -68,62 +67,62 @@ describe('Trie', function () {
 
     it('supports keys', function () {
         const trie = new Trie().insert(['a'], 'valueA').insert(['a', 'b'], 'valueB').insert(['c', 'a', 'd'], 'valueC');
-        assert.deepEqual(array(trie.keys()), [['a'], ['a', 'b'], ['c', 'a', 'd']]);
+        expect(array(trie.keys())).toEqual([['a'], ['a', 'b'], ['c', 'a', 'd']]);
     });
 
     it('supports values', function () {
         const trie = new Trie().insert(['a'], 'valueA').insert(['a', 'b'], 'valueB').insert(['c', 'a', 'd'], 'valueC');
-        assert.deepEqual(array(trie.values()), ['valueA', 'valueB', 'valueC']);
+        expect(array(trie.values())).toEqual(['valueA', 'valueB', 'valueC']);
     });
 });
 
 describe('PrefixTree', function () {
     it('supports isEmpty', function () {
-        assert.equal(new PrefixTree().isEmpty, true);
-        assert.equal(new PrefixTree().insert('value').isEmpty, false);
+        expect(new PrefixTree().isEmpty).toBe(true);
+        expect(new PrefixTree().insert('value').isEmpty).toBe(false);
     });
 
     it('supports contains', function () {
         const value = 'value';
-        assert.equal(new PrefixTree().contains(value), false);
-        assert.equal(new PrefixTree().insert(value).contains(value), true);
+        expect(new PrefixTree().contains(value)).toBe(false);
+        expect(new PrefixTree().insert(value).contains(value)).toBe(true);
     });
 
     it('supports lookup', function () {
         const valueA = 'valueA';
         const valueB = 'valueB';
-        assert.equal(new PrefixTree().lookup(valueA), undefined);
-        assert.equal(new PrefixTree().insert(valueA).lookup(valueA), valueA);
-        assert.equal(new PrefixTree().insert(valueA).insert(valueB).lookup(valueB), valueB);
+        expect(new PrefixTree().lookup(valueA)).toBeUndefined();
+        expect(new PrefixTree().insert(valueA).lookup(valueA)).toBe(valueA);
+        expect(new PrefixTree().insert(valueA).insert(valueB).lookup(valueB)).toBe(valueB);
     });
 
     it('supports match', function () {
         const valueA = 'valueA';
         const valueB = 'valueB';
-        assert.deepEqual(new PrefixTree().match('val'), []);
-        assert.deepEqual(new PrefixTree().insert(valueA).match('val'), [valueA]);
-        assert.deepEqual(new PrefixTree().insert(valueA).insert(valueB).match('val'), [valueA, valueB]);
+        expect(new PrefixTree().match('val')).toEqual([]);
+        expect(new PrefixTree().insert(valueA).match('val')).toEqual([valueA]);
+        expect(new PrefixTree().insert(valueA).insert(valueB).match('val')).toEqual([valueA, valueB]);
     });
 
     it('supports delete', function () {
         const valueA = 'valueA';
         const valueB = 'valueB';
         const trie = new PrefixTree().insert(valueA).insert(valueB);
-        assert.deepEqual(trie.match(''), [valueA, valueB]);
-        assert.deepEqual(trie.delete(valueB).match(''), [valueA]);
-        assert.deepEqual(trie.delete(valueA).delete(valueB).match(''), []);
+        expect(trie.match('')).toEqual([valueA, valueB]);
+        expect(trie.delete(valueB).match('')).toEqual([valueA]);
+        expect(trie.delete(valueA).delete(valueB).match('')).toEqual([]);
     });
 
     it('value can be a different type', function () {
         const trie = new PrefixTree<number>().insert('январь', 1).insert('января', 1).insert('янв.', 1);
 
-        assert.deepEqual(trie.match('янва'), [1, 1]);
-        assert.deepEqual(trie.match('янв'), [1, 1, 1]);
+        expect(trie.match('янва')).toEqual([1, 1]);
+        expect(trie.match('янв')).toEqual([1, 1, 1]);
     });
 
     it('supports entries', function () {
         const trie = new PrefixTree<number>().insert('янв.', 1).insert('январь', 2).insert('января', 3);
-        assert.deepEqual(array(trie.entries()), [
+        expect(array(trie.entries())).toEqual([
             ['янв.', 1],
             ['январь', 2],
             ['января', 3],
@@ -132,20 +131,20 @@ describe('PrefixTree', function () {
 
     it('supports keys', function () {
         const trie = new PrefixTree<number>().insert('янв.', 1).insert('январь', 2).insert('января', 3);
-        assert.deepEqual(array(trie.keys()), ['янв.', 'январь', 'января']);
+        expect(array(trie.keys())).toEqual(['янв.', 'январь', 'января']);
     });
 
     it('supports values', function () {
         const trie = new PrefixTree<number>().insert('янв.', 1).insert('январь', 2).insert('января', 3);
-        assert.deepEqual(array(trie.values()), [1, 2, 3]);
+        expect(array(trie.values())).toEqual([1, 2, 3]);
     });
 
     it('can get height', function () {
-        assert.deepEqual(new PrefixTree<number>().height, 0);
-        assert.deepEqual(new PrefixTree<number>().insert('1', 1).height, 1);
-        assert.deepEqual(new PrefixTree<number>().insert('12', 1).height, 2);
-        assert.deepEqual(new PrefixTree<number>().insert('123', 1).height, 3);
-        assert.deepEqual(new PrefixTree<number>().insert('1234', 1).height, 4);
+        expect(new PrefixTree<number>().height).toBe(0);
+        expect(new PrefixTree<number>().insert('1', 1).height).toBe(1);
+        expect(new PrefixTree<number>().insert('12', 1).height).toBe(2);
+        expect(new PrefixTree<number>().insert('123', 1).height).toBe(3);
+        expect(new PrefixTree<number>().insert('1234', 1).height).toBe(4);
     });
 
     it('can search with levenshtein distance', function () {
@@ -153,8 +152,8 @@ describe('PrefixTree', function () {
 
         const search = 'Hotel C';
         const [a, b] = trie.search(search, search.length * 0.75);
-        assert.deepEqual(a, {value: 'Hotel A', distance: 1});
-        assert.deepEqual(b, {value: 'Hotel AB', distance: 2});
+        expect(a).toEqual({value: 'Hotel A', distance: 1});
+        expect(b).toEqual({value: 'Hotel AB', distance: 2});
     });
 
     it('the default search ignores case and language specific accents', function () {
@@ -163,14 +162,14 @@ describe('PrefixTree', function () {
 
         const search = 'mikailovitch';
         const [a, b] = trie.search(search, 3);
-        assert.deepEqual(a, {value: 'Mikhaïlovitch', distance: 1});
-        assert.deepEqual(b, {value: 'Vikhaklovitch', distance: 3});
+        expect(a).toEqual({value: 'Mikhaïlovitch', distance: 1});
+        expect(b).toEqual({value: 'Vikhaklovitch', distance: 3});
     });
 
     it('the default match also ignores case and language specific accents', function () {
         const trie = new PrefixTree().insert('Mikhaïlovitch').insert('Vikhaklovitch');
 
-        assert.deepEqual(trie.match('mikhail'), ['Mikhaïlovitch']);
+        expect(trie.match('mikhail')).toEqual(['Mikhaïlovitch']);
     });
 });
 
@@ -189,20 +188,20 @@ n	6	6	5	4	3	3	2
 g	7	7	6	5	4	4	3
          */
         let row = Row.create(characters('kitten'), DEFAULT_COMPARATOR);
-        assert.deepEqual(row.values, [0, 1, 2, 3, 4, 5, 6]);
+        expect(row.values).toEqual([0, 1, 2, 3, 4, 5, 6]);
         row = row.next('s');
-        assert.deepEqual(row.values, [1, 1, 2, 3, 4, 5, 6]);
+        expect(row.values).toEqual([1, 1, 2, 3, 4, 5, 6]);
         row = row.next('i');
-        assert.deepEqual(row.values, [2, 2, 1, 2, 3, 4, 5]);
+        expect(row.values).toEqual([2, 2, 1, 2, 3, 4, 5]);
         row = row.next('t');
-        assert.deepEqual(row.values, [3, 3, 2, 1, 2, 3, 4]);
+        expect(row.values).toEqual([3, 3, 2, 1, 2, 3, 4]);
         row = row.next('t');
-        assert.deepEqual(row.values, [4, 4, 3, 2, 1, 2, 3]);
+        expect(row.values).toEqual([4, 4, 3, 2, 1, 2, 3]);
         row = row.next('i');
-        assert.deepEqual(row.values, [5, 5, 4, 3, 2, 2, 3]);
+        expect(row.values).toEqual([5, 5, 4, 3, 2, 2, 3]);
         row = row.next('n');
-        assert.deepEqual(row.values, [6, 6, 5, 4, 3, 3, 2]);
+        expect(row.values).toEqual([6, 6, 5, 4, 3, 3, 2]);
         row = row.next('g');
-        assert.deepEqual(row.values, [7, 7, 6, 5, 4, 4, 3]);
+        expect(row.values).toEqual([7, 7, 6, 5, 4, 4, 3]);
     });
 });

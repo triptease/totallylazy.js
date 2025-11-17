@@ -1,4 +1,3 @@
-import {assert} from 'chai';
 import {range, repeat} from '../src/sequence';
 import {sum} from '../src/numbers';
 import {ascending, by, Comparator, comparators, descending} from '../src/collections';
@@ -99,7 +98,7 @@ describe('Transducer', () => {
     });
 
     it('supports a sliding window on infinite sequence', function () {
-        assert.deepEqual(array(range(1), windowed(3), take(3)), [
+        expect(array(range(1), windowed(3), take(3))).toEqual([
             [1, 2, 3],
             [2, 3, 4],
             [3, 4, 5],
@@ -107,17 +106,17 @@ describe('Transducer', () => {
     });
 
     it('supports a sliding window on infinite sequence with custom step function', function () {
-        assert.deepEqual(array(range(1), windowed(3, 1), take(3)), [
+        expect(array(range(1), windowed(3, 1), take(3))).toEqual([
             [1, 2, 3],
             [2, 3, 4],
             [3, 4, 5],
         ]);
-        assert.deepEqual(array(range(1), windowed(3, 2), take(3)), [
+        expect(array(range(1), windowed(3, 2), take(3))).toEqual([
             [1, 2, 3],
             [3, 4, 5],
             [5, 6, 7],
         ]);
-        assert.deepEqual(array(range(1), windowed(3, 3), take(3)), [
+        expect(array(range(1), windowed(3, 3), take(3))).toEqual([
             [1, 2, 3],
             [4, 5, 6],
             [7, 8, 9],
@@ -125,7 +124,7 @@ describe('Transducer', () => {
     });
 
     it('supports a sliding window on infinite sequence with custom step function that is greater than the size', function () {
-        assert.deepEqual(array(range(1), windowed(3, 4), take(3)), [
+        expect(array(range(1), windowed(3, 4), take(3))).toEqual([
             [1, 2, 3],
             [5, 6, 7],
             [9, 10, 11],
@@ -193,7 +192,7 @@ describe('Transducer', () => {
                 })
             )
         );
-        assert.equal(called, false);
+        expect(called).toBe(false);
     });
 
     // it("can decompose transducers", async () => {

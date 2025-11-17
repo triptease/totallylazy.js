@@ -1,4 +1,3 @@
-import {assert} from 'chai';
 import {AsyncIteratorHandler} from '../src/collections';
 import {array} from '../src/array';
 
@@ -9,7 +8,7 @@ describe('AsyncIteratorHandler', function () {
         handler.value(2);
         handler.close();
 
-        assert.deepEqual(await array(handler), [1, 2]);
+        expect(await array(handler)).toEqual([1, 2]);
     });
 
     it('will wait until data is available', async () => {
@@ -18,11 +17,11 @@ describe('AsyncIteratorHandler', function () {
         const two = handler.next();
         const finished = handler.next();
         handler.value(1);
-        assert.deepEqual(await one, {value: 1, done: false});
+        expect(await one).toEqual({value: 1, done: false});
         handler.value(2);
-        assert.deepEqual(await two, {value: 2, done: false});
+        expect(await two).toEqual({value: 2, done: false});
         handler.close();
-        assert.deepEqual(await finished, {value: undefined, done: true});
+        expect(await finished).toEqual({value: undefined, done: true});
     });
 
     it('can also return different type', async () => {
@@ -31,10 +30,10 @@ describe('AsyncIteratorHandler', function () {
         const two = handler.next();
         const finished = handler.next();
         handler.value(1);
-        assert.deepEqual(await one, {value: 1, done: false});
+        expect(await one).toEqual({value: 1, done: false});
         handler.value(2);
-        assert.deepEqual(await two, {value: 2, done: false});
+        expect(await two).toEqual({value: 2, done: false});
         handler.close('RETURN');
-        assert.deepEqual(await finished, {value: 'RETURN', done: true});
+        expect(await finished).toEqual({value: 'RETURN', done: true});
     });
 });

@@ -1,4 +1,3 @@
-import {assert} from 'chai';
 import {lazy} from '../src/lazy';
 
 describe('lazy', () => {
@@ -15,10 +14,10 @@ describe('lazy', () => {
         const foo2 = new Foo();
 
         foo1.a;
-        assert.equal(foo1.count, 1);
+        expect(foo1.count).toBe(1);
         foo1.a;
-        assert.equal(foo1.count, 1);
+        expect(foo1.count).toBe(1);
         foo2.a;
-        assert.equal(foo2.count, 1);
+        expect(foo2.count).toBe(1);
     });
 });

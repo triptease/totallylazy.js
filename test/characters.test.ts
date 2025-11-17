@@ -1,5 +1,4 @@
 import {characters, different, splitByRegex} from '../src/characters';
-import {assert} from 'chai';
 
 describe('difference', function () {
     it('can find differences between string', () => {
@@ -17,7 +16,7 @@ describe('difference', function () {
             '2000年11月1日',
             '2000年12月1日',
         ];
-        assert.deepEqual(different(values), ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
+        expect(different(values)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
 
         const russianMonths = [
             '1 января 2000 г',
@@ -33,7 +32,7 @@ describe('difference', function () {
             '1 ноября 2000 г',
             '1 декабря 2000 г',
         ];
-        assert.deepEqual(different(russianMonths), [
+        expect(different(russianMonths)).toEqual([
             'января',
             'февраля',
             'марта',
@@ -62,7 +61,7 @@ describe('difference', function () {
             '01 нояб. 2000 г.',
             '01 дек. 2000 г.',
         ];
-        assert.deepEqual(different(shortRussian), [
+        expect(different(shortRussian)).toEqual([
             'янв.',
             'февр.',
             'мар.',
@@ -88,7 +87,7 @@ describe('difference', function () {
             'Jan 2000 Sat',
             'Jan 2000 Sun',
         ];
-        assert.deepEqual(different(input), ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
+        expect(different(input)).toEqual(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
     });
 
     it('can find difference when at start of string', () => {
@@ -101,19 +100,19 @@ describe('difference', function () {
             'Sat Jan 2000',
             'Sun Jan 2000',
         ];
-        assert.deepEqual(different(input), ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
+        expect(different(input)).toEqual(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
     });
 });
 
 describe('characters', function () {
     it('can split by regex for IE 11', () => {
         const characters = splitByRegex('Foo bar');
-        assert.equal(characters.length, 7);
+        expect(characters.length).toBe(7);
     });
 
     it('ignores RTL unicode marker', () => {
         const containsLeadingRtlMarker = '‎Jan';
-        assert.equal(containsLeadingRtlMarker.length, 4);
-        assert.equal(characters(containsLeadingRtlMarker).length, 3);
+        expect(containsLeadingRtlMarker.length).toBe(4);
+        expect(characters(containsLeadingRtlMarker).length).toBe(3);
     });
 });

@@ -1,5 +1,4 @@
 import {range, sequence} from '../src/sequence';
-import {assert} from 'chai';
 import {sum} from '../src/numbers';
 import {single} from '../src/transducers/single';
 import {first} from '../src/transducers/first';
@@ -24,7 +23,7 @@ describe('Sequence', () => {
     });
 
     it('range throw is step is 0', () => {
-        assert.throws(() => assertSync(range(1, undefined, 0)), Error, 'step can not be 0');
+        expect(() => assertSync(range(1, undefined, 0))).toThrow('step can not be 0');
     });
 
     it('decomposition works - WIP', () => {
@@ -34,8 +33,8 @@ describe('Sequence', () => {
             find(n => n > 2)
         );
         const [fmap, findT] = value.transducers;
-        assert.instanceOf(fmap, FlatMapTransducer);
-        assert.instanceOf(findT, CompositeTransducer);
+        expect(fmap).toBeInstanceOf(FlatMapTransducer);
+        expect(findT).toBeInstanceOf(CompositeTransducer);
     });
 
     it('supports flatMap', () => {
@@ -70,23 +69,21 @@ describe('Sequence', () => {
     });
 
     it('can get a single value out', () => {
-        assert.equal(
+        expect(
             single(
                 range(1),
                 filter((n: number) => n % 2 == 0),
                 first()
-            ),
-            2
-        );
-        assert.equal(
+            )
+        ).toBe(2);
+        expect(
             single(
                 range(1, 10),
                 filter((n: number) => n % 2 == 0),
                 last()
-            ),
-            10
-        );
-        assert.equal(single([], reduce(sum, 0)), 0);
+            )
+        ).toBe(10);
+        expect(single([], reduce(sum, 0))).toBe(0);
     });
 
     it('supports async operations', async () => {
