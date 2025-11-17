@@ -57,11 +57,6 @@ jobs:
       - gcp-oidc-generate-cred-config-file  
       - gcp-oidc-authenticate
       - run:
-          name: Verify that gcloud is authenticated
-          environment:
-            GCP_SERVICE_ACCOUNT_EMAIL: localised-parsing@triptease-onboard.iam.gserviceaccount.com
-          command: gcloud iam service-accounts get-iam-policy "${GCP_SERVICE_ACCOUNT_EMAIL}"
-      - run:
           name: Verify that ADC works
           command: |
               ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
