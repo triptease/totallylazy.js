@@ -8,16 +8,16 @@ commands:
     description: "Authenticate with GCP using a CircleCI OIDC token."
     parameters:
       project_id:
-        type: env_var_name
+        type: string
         default: '984058826754'
       workload_identity_pool_id:
-        type: env_var_name
+        type: string
         default: onboard
       workload_identity_pool_provider_id:
-        type: env_var_name
+        type: string
         default: cirlce
       service_account_email:
-        type: env_var_name
+        type: string
         default: localised-parsing@triptease-onboard.iam.gserviceaccount.com
       gcp_cred_config_file_path:
         type: string
