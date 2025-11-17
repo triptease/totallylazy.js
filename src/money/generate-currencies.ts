@@ -1,6 +1,5 @@
 import {select} from 'xpath';
 import {DOMParser} from 'xmldom';
-import fetch from 'node-fetch';
 import {File} from '../files';
 import {simplify, sparqlQuery} from 'wikidata-sdk';
 import {additionalSymbols, Currency, CurrencySymbol} from './currencies-def';
