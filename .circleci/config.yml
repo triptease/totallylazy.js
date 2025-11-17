@@ -15,7 +15,7 @@ commands:
         default: onboard
       workload_identity_pool_provider_id:
         type: string
-        default: cirlce
+        default: circle
       service_account_email:
         type: string
         default: localised-parsing@triptease-onboard.iam.gserviceaccount.com
