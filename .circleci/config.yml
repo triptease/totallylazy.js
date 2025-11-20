@@ -47,11 +47,12 @@ commands:
                 default: localised-parsing@triptease-onboard.iam.gserviceaccount.com
             gcp_cred_config_file_path:
                 type: string
-                default: /home/circleci/gcp_cred_config.json
+                default: /tmp/keys/gcp_cred_config.json
             oidc_token_file_path:
                 type: string
-                default: /home/circleci/oidc_token.json
+                default: /tmp/keys/oidc_token.json
         steps:
+            - run: mkdir /tmp/keys
             - run:
                     command: |
                         # Store OIDC token in temp file
@@ -67,7 +68,7 @@ commands:
         parameters:
             gcp_cred_config_file_path:
                 type: string
-                default: /home/circleci/gcp_cred_config.json
+                default: /tmp/keys/gcp_cred_config.json
         steps:
             - run:
                     command: |
@@ -80,7 +81,11 @@ jobs:
     ci:
         docker:
             - image: cimg/base:stable
+        environment:
+            GOOGLE_APPLICATION_CREDENTIALS: /tmp/keys/gcp_cred_config.json
         steps:
+            - attach_workspace:
+                at: /tmp/keys
             - checkout
             - setup_asdf
             - run: ./run ci
@@ -104,18 +109,21 @@ jobs:
                     command: |
                             ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
                             curl -f -i -H "Content-Type: application/x-www-form-urlencoded" -d "access_token=${ACCESS_TOKEN}" https://www.googleapis.com/oauth2/v1/tokeninfo
-
+            - persist_to_workspace:
+                root: /tmp/keys
+                paths:
+                    - gcp_cred_config.json
+                    - oidc_token.json
 
 workflows:
     version: 2
 
     master_build:
         jobs:
-            - gcp-oidc-defaults:
-                    name: Generate Creds File and Authenticate
-                    context:
-                    - gcp-oidc-dev
+            - gcp-oidc-defaults
             - ci:
+                requires:
+                    - gcp-oidc-defaults
                 filters:
                     branches:
                         only: master
