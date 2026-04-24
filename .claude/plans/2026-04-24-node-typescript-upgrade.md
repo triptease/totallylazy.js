@@ -8,8 +8,8 @@
 | TypeScript | ~~4.8.4~~ 5.9.3 | ^5.8.0 |
 | `@types/node` | ~~13.13.52~~ 22.19.17 | ^22.0.0 |
 | `full-icu` | 1.5.0 | remove |
-| `esbuild` | 0.14.54 | ^0.25.x |
-| `esbuild-runner` | 2.2.1 | replace with `tsx` |
+| `esbuild` | ~~0.14.54~~ 0.25.12 | ^0.25.0 |
+| `esbuild-runner` | ~~2.2.1~~ replaced by tsx 4.21.0 | `tsx` ^4.0.0 |
 
 ---
 
@@ -136,11 +136,11 @@ The env var pointed at the now-removed package. Node's built-in ICU provides the
 
 ---
 
-## Step 4: Replace `esbuild-runner` with `tsx`, upgrade `esbuild` — TODO
+## Step 4: Replace `esbuild-runner` with `tsx`, upgrade `esbuild` ✅ DONE
 
-`esbuild-runner` is abandoned (last release 2022). `tsx` is actively maintained and a drop-in replacement.
+`esbuild-runner` is abandoned (last release 2022). `tsx` is actively maintained and a drop-in replacement. `esbuild` was also upgraded from 0.14.x (3 years old) to 0.25.x — `tsx` uses its own bundled esbuild internally, but the project's `esbuild` devDependency is kept since `ts-jest` has it as an optional peer.
 
-### Files to change
+### Changes made
 
 **`package.json`** — devDependencies:
 ```diff
@@ -149,23 +149,23 @@ The env var pointed at the now-removed package. Node's built-in ICU provides the
 + "esbuild": "^0.25.0",
 + "tsx": "^4.0.0",
 ```
+Resolved to **esbuild 0.25.12** and **tsx 4.21.0**.
 
-**`package.json`** — scripts (lines 17-18):
+**`package.json`** — scripts:
 ```diff
 - "generate": "esr money/generate-currencies.ts",
 - "perf": "esr perf/trie.ts",
-+ "generate": "tsx money/generate-currencies.ts",
++ "generate": "tsx src/money/generate-currencies.ts",
 + "perf": "tsx perf/trie.ts",
 ```
 
-### Validation
-```bash
-pnpm install
-pnpm exec tsc --build --force
-pnpm test
-pnpm run generate
-pnpm run perf
-```
+**Path fix for `generate`**: the original script referenced `money/generate-currencies.ts` but the file lives at `src/money/generate-currencies.ts`. `esr` must have resolved this differently (or the script was already broken). Fixed to the correct path during the `tsx` migration.
+
+### Validation result
+- **Compilation**: passes cleanly
+- **Tests**: same 6 pre-existing Node 22 ICU failures, no new failures
+- **`pnpm run generate`**: `tsx` successfully finds and executes the script. It fails with a `Forbidden` error from the external Wikidata API — this is a network/auth issue, not a `tsx` issue.
+- **`pnpm run perf`**: runs successfully, benchmark output produced
 
 ---
 
