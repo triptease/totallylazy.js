@@ -10,7 +10,7 @@ module.exports = {
   globals: {
     'ts-jest': {
       tsconfig: {
-        target: 'ES6',
+        target: 'ES2022',
         module: 'commonjs',
       },
     },

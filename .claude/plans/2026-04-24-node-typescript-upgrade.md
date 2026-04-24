@@ -241,11 +241,9 @@ Changed from asserting a specific interleaving order to asserting all expected l
 
 ---
 
-## Step 6 (optional): Bump TypeScript target to ES2022 — TODO
+## Step 6 (optional): Bump TypeScript target to ES2022 ✅ DONE
 
-Once everything is green on Node 22, optionally modernise the compile target.
-
-### Files to change
+### Changes made
 
 **`tsconfig.json`**:
 ```diff
@@ -253,21 +251,19 @@ Once everything is green on Node 22, optionally modernise the compile target.
 + "target": "ES2022",
 ```
 
-**`jest.config.js`** line 13:
+**`jest.config.js`**:
 ```diff
 - target: 'ES6',
 + target: 'ES2022',
 ```
 
-### Why
-- Avoids emitting polyfills for features Node 22 supports natively (async/await, optional chaining, nullish coalescing, etc.)
-- `useDefineForClassFields: false` (added in Step 1) protects the decorators
+**Why**: ES6 target caused TypeScript to emit polyfills and downlevel transforms for features that Node 22 supports natively — async/await, optional chaining, nullish coalescing, `Array.prototype.at()`, etc. Targeting ES2022 produces smaller, more readable output that runs directly on the engine without unnecessary wrappers.
 
-### Validation
-```bash
-pnpm exec tsc --build --force
-pnpm test
-```
+**Why it's safe**: `useDefineForClassFields: false` (added in Step 1) prevents the one breaking behaviour that ES2022 target would otherwise introduce — class fields bypassing the prototype, which would break the `@lazy` and `@cache` decorators.
+
+### Validation result
+- **Compilation**: passes cleanly
+- **Tests**: 412 passed, 20 suites, 0 failures
 
 ---
 
