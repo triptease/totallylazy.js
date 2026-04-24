@@ -6,7 +6,7 @@
 |---|---|---|
 | Node | 18.12.0 | 22.x (LTS) |
 | TypeScript | ~~4.8.4~~ 5.9.3 | ^5.8.0 |
-| `@types/node` | 13.13.52 | ^22.0.0 |
+| `@types/node` | ~~13.13.52~~ 22.19.17 | ^22.0.0 |
 | `full-icu` | 1.5.0 | remove |
 | `esbuild` | 0.14.54 | ^0.25.x |
 | `esbuild-runner` | 2.2.1 | replace with `tsx` |
@@ -37,14 +37,14 @@ Resolved to **5.9.3**.
 - `moduleResolution: "node10"` — makes the current implicit default explicit. TS 5.x emits deprecation warnings about the ambiguity otherwise.
 - `useDefineForClassFields: false` — **critical**. The `@lazy` and `@cache` decorators (`src/lazy.ts`, `src/cache.ts`) use `experimentalDecorators` and work by replacing getters on the prototype. TS 5.x with `target >= ES2022` defaults `useDefineForClassFields: true`, which silently breaks these decorators. Setting it explicitly now future-proofs against a later target bump.
 
-**`src/files.ts`** — fixed type error caused by `@types/node@13` `Buffer` not satisfying TS 5.9's `Uint8Array` definition:
+**`src/files.ts`** — temporary fix for type error caused by `@types/node@13` `Buffer` not satisfying TS 5.9's `Uint8Array` definition:
 ```diff
   async bytes(): Promise<Uint8Array> {
 -     return await promisify(fs.readFile)(this.absolutePath);
 +     return new Uint8Array(await promisify(fs.readFile)(this.absolutePath));
   }
 ```
-This wrapping can be revisited in Step 2 once `@types/node` is upgraded — the newer types may make it unnecessary.
+This wrapping was reverted in Step 2 — with `@types/node@22`, `Buffer` properly extends `Uint8Array`.
 
 ### Validation result
 - **Compilation**: passes cleanly
@@ -56,28 +56,54 @@ This wrapping can be revisited in Step 2 once `@types/node` is upgraded — the 
 
 ---
 
-## Step 2: Upgrade `@types/node` — TODO
+## Step 2: Upgrade `@types/node` ✅ DONE
 
-### Files to change
+### Changes made
 
 **`package.json`** optionalDependencies:
 ```diff
 - "@types/node": "^13.13.52"
 + "@types/node": "^22.0.0"
 ```
+Resolved to **22.19.17**.
 
-### Risk
-- New type definitions may surface type errors where the code uses Node APIs that have had their signatures tightened (e.g. `fs.rmdir` callback types, `Buffer` constructor deprecation warnings). These will need to be fixed.
+**`src/files.ts`** — three type errors from tightened Node API signatures in `@types/node@22`:
 
-### Follow-up from Step 1
-- Revisit the `new Uint8Array(...)` wrapping in `src/files.ts:63` — with modern `@types/node`, `Buffer` should properly extend `Uint8Array` and the wrapping may be removable.
+1. **Reverted Step 1 `Uint8Array` wrapping** — with `@types/node@22`, `Buffer` properly extends `Uint8Array`, so the `new Uint8Array(...)` wrapping is no longer needed:
+   ```diff
+     async bytes(): Promise<Uint8Array> {
+   -     return new Uint8Array(await promisify(fs.readFile)(this.absolutePath));
+   +     return await promisify(fs.readFile)(this.absolutePath);
+     }
+   ```
 
-### Validation
-```bash
-pnpm install
-pnpm exec tsc --build --force
-pnpm test
+2. **Removed custom `FileOptions` and `StreamOptions` type aliases** — these included a bare `string` union member which is too wide for `@types/node@22` (expects `BufferEncoding` not `string`). Replaced with Node's own types using `Parameters<>` utility type to extract the option types directly from the function signatures, since the internal interfaces (`ReadStreamOptions`, `WriteStreamOptions`) are not exported from the `fs` module:
+   ```diff
+   - read(options?: StreamOptions): Readable {
+   + read(options?: Parameters<typeof fs.createReadStream>[1]): Readable {
+
+   - async append(data: any, options?: FileOptions): Promise<void> {
+   -     return await promisify(fs.appendFile)(this.absolutePath, data, options);
+   + async append(data: any, options?: Parameters<typeof fs.appendFile>[2]): Promise<void> {
+   +     return await promisify(fs.appendFile)(this.absolutePath, data, options as fs.WriteFileOptions);
+
+   - write(options?: StreamOptions): Writable {
+   + write(options?: Parameters<typeof fs.createWriteStream>[1]): Writable {
+   ```
+
+3. **Cast needed for `append`** — `promisify(fs.appendFile)` infers its options parameter from the callback-based overload where param index 2 can be either options or callback (`NoParamCallback`). The promisified version only accepts options, but TS can't narrow this automatically, so a cast to `fs.WriteFileOptions` is needed to bridge the type mismatch.
+
+**`src/files.ts`** — replaced the custom `FileOptions` and `StreamOptions` type aliases with deprecated aliases pointing to Node's own types, to avoid breaking downstream consumers:
+```typescript
+/** @deprecated Use Node's fs types instead */
+export type StreamOptions = Parameters<typeof fs.createReadStream>[1];
+/** @deprecated Use Node's fs types instead */
+export type FileOptions = Parameters<typeof fs.appendFile>[2];
 ```
+
+### Validation result
+- **Compilation**: passes cleanly
+- **Tests**: same 6 pre-existing Node 22 ICU failures as Step 1 (no new failures introduced)
 
 ---
 
