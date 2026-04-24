@@ -49,7 +49,7 @@ describe('run', function () {
             exitCode = e.code;
         }
 
-        expect(output.join('')).toBe('one\nthree\ntwo\nfour\n');
+        expect(output.join('').split('\n').sort()).toEqual(['', 'four', 'one', 'three', 'two']);
         expect(exitCode).toBe(1);
     });
 

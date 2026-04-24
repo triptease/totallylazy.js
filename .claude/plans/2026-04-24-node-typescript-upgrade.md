@@ -4,10 +4,10 @@
 
 | Item | Current | Target |
 |---|---|---|
-| Node | 18.12.0 | 22.x (LTS) |
+| Node | ~~18.12.0~~ 22.16.0 | 22.x (LTS) |
 | TypeScript | ~~4.8.4~~ 5.9.3 | ^5.8.0 |
 | `@types/node` | ~~13.13.52~~ 22.19.17 | ^22.0.0 |
-| `full-icu` | 1.5.0 | remove |
+| `full-icu` | ~~1.5.0~~ removed | remove |
 | `esbuild` | ~~0.14.54~~ 0.25.12 | ^0.25.0 |
 | `esbuild-runner` | ~~2.2.1~~ replaced by tsx 4.21.0 | `tsx` ^4.0.0 |
 
@@ -169,52 +169,75 @@ Resolved to **esbuild 0.25.12** and **tsx 4.21.0**.
 
 ---
 
-## Step 5: Update Node version — TODO
+## Step 5: Update Node version ✅ DONE
 
-### Files to change
+### Changes made
 
-**`.tool-versions`**:
+**`.tool-versions`** and **`.nvmrc`**: bumped from Node 18.12.0 to 22.16.0.
+
+### ICU guard cleanup
+
+Removed all `NODE_ICU_DATA` / `full-icu` guards from test files. These `beforeAll` blocks checked `process.env.NODE_ICU_DATA` and logged a warning, but were effectively no-ops (they didn't actually skip tests). They were needed historically when Node didn't bundle full ICU, but Node 18+ includes it natively, making them dead code. Also removed the now-unused `runningInNode` imports.
+
+Files cleaned:
+- `test/dates/dates.test.ts` — removed 1 guard + `runningInNode` import
+- `test/dates/formatting.test.ts` — removed 1 guard + replaced `runningInNode` import with `removeUnicodeMarkers` import (needed for the whitespace fix below)
+- `test/dates/datum.test.ts` — removed 3 guards + `runningInNode` import
+- `test/money/parsing.test.ts` — removed 1 guard + `runningInNode` import
+
+### ICU locale data fixes
+
+Node 22 ships ICU 74+ which changes formatting output for several locales. Three distinct issues were fixed:
+
+**1. `nl` locale — period removed after abbreviated month** (`test/dates/dates.test.ts`)
+
+Updated hardcoded expectation:
 ```diff
-- nodejs 18.12.0
-+ nodejs 22.16.0
-  pnpm 10.5.2
+- 'vr 25 jan. 2019'
++ 'vr 25 jan 2019'
+```
+**Why**: Node 22's ICU data for Dutch no longer includes a period after abbreviated month names. This is a data-only change from the Unicode CLDR project, not a bug.
+
+**2. `ru` locale — narrow no-break space in `formatToParts`** (`test/dates/formatting.test.ts`)
+
+Added whitespace normalization to `assertPartsMatch`:
+```typescript
+function normalizeWhitespace(s: string): string {
+    return s.replace(/[\u200E\u200F\u202F\u00A0]/g, ' ');
+}
+```
+Applied to both sides of the comparison before asserting equality.
+
+**Why**: Node 22 has an internal inconsistency — `Intl.DateTimeFormat.format()` returns `U+0020` (regular space) before `г.` in Russian, but `formatToParts()` returns `U+202F` (narrow no-break space) for the same literal. The `LearningDateFormatter` learns patterns from `format()` output, so it produces regular spaces. Since both representations are semantically correct and the mismatch is a Node/ICU quirk (not a library bug), normalizing whitespace variants in the test comparison is the right approach.
+
+**3. `ar` locale — RTL marks in ponyfill vs native** (`test/money/parsing.test.ts`)
+
+Added RTL mark stripping to the native result before comparing with the ponyfill:
+```typescript
+function stripRtlMarkers(parts: NumberFormatPart[]): NumberFormatPart[] {
+    return parts
+        .map(p => ({...p, value: p.value.replace(/[\u200E\u200F]/g, '')}))
+        .filter(p => p.value.length > 0);
+}
 ```
 
-**`.nvmrc`**:
+**Why**: The library intentionally strips RTL/LTR Unicode markers (`U+200E`, `U+200F`) throughout its parsing and formatting pipeline (see `src/characters.ts:removeUnicodeMarkers`). This is by design — RTL marks cause issues with string matching and pattern learning. On Node 22, native `Intl.NumberFormat.formatToParts()` emits RTL mark literal parts for Arabic locales, but the ponyfill (which learns from `format()` output that has been stripped) doesn't include them. The test now strips RTL marks from the native result to match the library's intentional behaviour, rather than trying to make the ponyfill emit marks the library is designed to remove.
+
+### stdout/stderr interleaving fix
+
+**`test/run.test.ts`** — fixed flaky test for stdout/stderr ordering.
+
+Changed from asserting a specific interleaving order to asserting all expected lines are present:
 ```diff
-- v18.12
-+ v22.16
+- expect(output.join('')).toBe('one\nthree\ntwo\nfour\n');
++ expect(output.join('').split('\n').sort()).toEqual(['', 'four', 'one', 'three', 'two']);
 ```
 
-### Notes
-- CI (CircleCI) reads Node version from `.tool-versions` via `asdf install` — no other CI files need changing.
-- No Dockerfiles exist in this repo.
-- `jest@30.2.0` supports `^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0` — Node 22 is fine.
-- `ts-jest@29.4.5` supports `>=20.0.0` — Node 22 is fine.
+**Why**: The test runs a shell script that writes to both stdout and stderr without shell redirect. The test name itself acknowledges "order is not perfectly preserved". On Node 18, stdout happened to be buffered before stderr, producing `one, three, two, four`. On Node 22, the event loop timing changed, producing `one, two, four, three` instead. Since the point of the test is to verify that all output is captured (not the order), asserting sorted content is correct. The test was already flaky on Node 22 even on master — it passed in isolation but failed under full-suite load.
 
-### Test expectation fixes required
-Node 22 ships updated ICU locale data that changes formatting output. The following test expectations need updating (confirmed failing on Node 22.22.1 even on master):
-- **`nl` locale** (`test/dates/dates.test.ts:467`): `"vr 25 jan. 2019"` → `"vr 25 jan 2019"` (period after abbreviated month removed)
-- **`ru` locale** (`test/dates/formatting.test.ts:41`): `"четверг, 28 июня 2001 г."` — visually identical but different Unicode codepoints (likely thin space vs regular space)
-- **`ar` formatToParts** (`test/money/parsing.test.ts:240`): leading RTL mark `‏` literal part no longer emitted — ponyfill expectation needs to match new native output
-- These failures appear in 4 test suites: `dates.test.ts`, `datum.test.ts`, `formatting.test.ts`, `parsing.test.ts`
-
-### Stale ICU guard cleanup required
-Several test files contain `console.log` guards that check for `NODE_ICU_DATA` and warn if it's not set. These were needed when Node didn't bundle full ICU, but are now obsolete (Node 18+ includes full ICU). The guards were surfaced in Step 3 after removing the `NODE_ICU_DATA` env var from the test script. Files containing the stale guard (identified from test output):
-- `test/dates/dates.test.ts:273`
-- `test/dates/formatting.test.ts:10`
-- `test/dates/datum.test.ts:20`, `:323`, `:379`
-- `test/money/parsing.test.ts:261`
-
-These guards should be removed entirely — they are no longer useful since no external ICU package is needed.
-
-### Validation
-```bash
-asdf install nodejs 22.16.0  # or nvm install 22.16
-pnpm install
-pnpm exec tsc --build --force
-pnpm test
-```
+### Validation result
+- **Compilation**: passes cleanly
+- **Tests**: 412 passed, 20 suites, 0 failures
 
 ---
 
@@ -292,6 +315,81 @@ The `globals['ts-jest']` configuration path is deprecated in ts-jest 28+. Migrat
 pnpm exec tsc --build --force
 pnpm test
 ```
+
+---
+
+## Locale change impact on consumers and possible reverse mappings
+
+### What changed
+
+Node 22 ships ICU 74+ with updated Unicode CLDR data. This changes the output of `Intl.DateTimeFormat.format()` and `Intl.NumberFormat.formatToParts()` for some locales. Since this library delegates formatting to `Intl`, its `format()` output changes accordingly. Three locale behaviours changed:
+
+1. **`nl` (Dutch)**: abbreviated months lost trailing period — `"jan."` → `"jan"`, `"feb."` → `"feb"`, etc.
+2. **`ru` (Russian)**: literal space before `г.` (year suffix) changed from `U+0020` to `U+202F` (narrow no-break space) in `formatToParts` output (but not in `format` output — a Node inconsistency)
+3. **`ar` (Arabic)**: RTL marks (`U+200F`) in `formatToParts` output — this library already strips these intentionally, so no consumer-visible change here
+
+### Impact assessment
+
+**Parsing is unaffected.** The parser is already liberal:
+- The `Spaces` class (`src/dates/formatting.ts`) normalizes `U+0020`, `U+00A0`, and `U+202F` — the `ru` whitespace change is already handled
+- The parser treats trailing dots as optional — `"jan."` and `"jan"` both parse correctly for `nl`
+- RTL marks are stripped by `removeUnicodeMarkers` before parsing
+
+**Formatting output changes.** Consumers who compare `format()` output against hardcoded strings will break. For example, any code doing `if (format(date, 'nl', opts) === 'vr 25 jan. 2019')` will fail.
+
+### If reverse mappings are needed
+
+To preserve the old formatting output for consumers, a post-processing layer could normalize `format()` output to match the Node 18 ICU behaviour. This would sit in `ImprovedDateTimeFormat.format()` (`src/dates/format.ts:94`), which already does post-processing (it strips RTL markers).
+
+#### Approach 1: Locale-specific format fixups
+
+Add a fixup map that transforms the new ICU output back to the old form:
+
+```typescript
+// src/dates/format.ts
+const localeFixups: Record<string, (value: string) => string> = {
+    'nl': (value) => value.replace(
+        /\b(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)\b/gi,
+        (match) => match + '.'
+    ),
+};
+
+export class ImprovedDateTimeFormat implements DateFormatter {
+    format(date: Date): string {
+        let result = removeUnicodeMarkers(this.delegate.format(date));
+        const fixup = localeFixups[this.locale] || localeFixups[this.locale.split('-')[0]];
+        if (fixup) result = fixup(result);
+        return result;
+    }
+}
+```
+
+**Pros**: targeted, only affects known changes, easy to understand.
+**Cons**: brittle — requires manual maintenance for every CLDR update that changes locale output. Creates a growing list of fixups over time. Effectively fighting upstream Unicode decisions.
+
+#### Approach 2: Whitespace normalization in format output
+
+For the `ru` whitespace issue, normalize all exotic whitespace to regular space in `format()` output:
+
+```typescript
+format(date: Date): string {
+    return removeUnicodeMarkers(this.delegate.format(date))
+        .replace(/[\u202F\u00A0]/g, ' ');
+}
+```
+
+This is already partially done — `removeUnicodeMarkers` strips RTL/LTR marks. Extending it to normalize whitespace would make `format()` output stable across ICU versions for whitespace changes.
+
+**Pros**: generic, handles all future whitespace changes across all locales.
+**Cons**: loses semantic meaning of narrow no-break space (which is typographically correct in some contexts).
+
+#### Approach 3: Do nothing (recommended)
+
+The formatting output is a thin wrapper around `Intl.DateTimeFormat`. Consumers should not depend on exact string output from locale-aware formatting — it's inherently tied to the ICU/CLDR version bundled with Node. The library's value is in **parsing** (which is already resilient to these changes), not in producing stable formatted strings.
+
+Consumers comparing formatted output against hardcoded strings have a fragile pattern that will break on any Node upgrade. The right fix is on the consumer side: compare parsed `Date` objects or use format-then-parse round-trip assertions instead of string equality.
+
+**If a consumer needs stable output**, they should pin their Node version or use the library's format string API (`parser('nl', 'dd MMM yyyy')`) which produces deterministic output independent of ICU data.
 
 ---
 

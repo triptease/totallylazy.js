@@ -17,7 +17,6 @@ import {
 } from '../../src/money';
 import {locales} from '../dates/dates.test';
 import {currencies} from '../../src/money/currencies';
-import {runningInNode} from '../../src/node';
 import NumberFormatPart = Intl.NumberFormatPart;
 import {Currency} from '../../src/money/currencies-def';
 import {get} from '../../src/functions';
@@ -230,13 +229,19 @@ describe('Money', function () {
     });
 
     it('has ponyfill for formatToParts', () => {
+        function stripRtlMarkers(parts: NumberFormatPart[]): NumberFormatPart[] {
+            return parts
+                .map(p => ({...p, value: p.value.replace(/[\u200E\u200F]/g, '')}))
+                .filter(p => p.value.length > 0);
+        }
+
         for (const locale of numberLocales.filter(l => l != 'hy-Latn-IT-arevela')) {
             for (const [code] of currenciesWithDifferentDecimals) {
                 for (const amount of amounts) {
                     const original = money(code, amount);
                     const formatter = Formatter.create(original.currency, locale);
                     const ponyResult = toPartsPonyfill(original, locale);
-                    const nativeResult = formatter.formatToParts(original.amount);
+                    const nativeResult = stripRtlMarkers(formatter.formatToParts(original.amount));
                     expect(ponyResult).toEqual(nativeResult);
                 }
             }
@@ -256,13 +261,6 @@ export const currenciesWithDifferentDecimals: [string, Currency][] = Object.valu
 );
 
 describe('CurrencySymbols', function () {
-    beforeAll(function () {
-        if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
-            console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            // Skip all tests in this suite
-            return;
-        }
-    });
 
     it('is flexible in parsing as long as there is a unique match', () => {
         const fr = CurrencySymbols.get('fr-FR');

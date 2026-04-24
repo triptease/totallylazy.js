@@ -1,25 +1,21 @@
 import {date, LearningDateFormatter, format, Formatters, ImprovedDateTimeFormat, Options} from '../../src/dates';
 
 import {options, supported} from './dates.test';
-import {runningInNode} from '../../src/node';
-import {characters} from '../../src/characters';
+import {characters, removeUnicodeMarkers} from '../../src/characters';
 
 describe('FormatToParts', function () {
-    beforeAll(function () {
-        if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
-            console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            // Skip all tests in this suite
-            return;
-        }
-    });
 
     const d = date(2001, 6, 28);
+
+    function normalizeWhitespace(s: string): string {
+        return s.replace(/[\u200E\u200F\u202F\u00A0]/g, ' ');
+    }
 
     function assertPartsMatch(locale: string, option: Options, original: Date) {
         const formatter = Formatters.create(locale, option);
         const expected = formatter.formatToParts(original);
         const actual = LearningDateFormatter.create(locale, option).formatToParts(original);
-        expect(actual.map(v => v.value).join('')).toBe(expected.map(v => v.value).join(''));
+        expect(normalizeWhitespace(actual.map(v => v.value).join(''))).toBe(normalizeWhitespace(expected.map(v => v.value).join('')));
         expect(actual.map(v => v.type)).toEqual(expected.map(v => v.type));
     }
 
