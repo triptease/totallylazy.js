@@ -107,13 +107,13 @@ export type FileOptions = Parameters<typeof fs.appendFile>[2];
 
 ---
 
-## Step 3: Remove `full-icu` — TODO
+## Step 3: Remove `full-icu` ✅ DONE
 
-Node 18+ ships with full ICU built-in. The `full-icu` package and `NODE_ICU_DATA` env var are unnecessary.
+Node 18+ ships with full ICU built-in. The `full-icu` package and `NODE_ICU_DATA` env var were unnecessary overhead — Node bundles the same ICU data natively since v13 (with full-icu becoming the default build in v18).
 
-### Files to change
+### Changes made
 
-**`package.json`** — remove from optionalDependencies (line 53):
+**`package.json`** — removed `full-icu` from optionalDependencies:
 ```diff
   "optionalDependencies": {
 -     "@types/node": "^22.0.0",
@@ -122,19 +122,17 @@ Node 18+ ships with full ICU built-in. The `full-icu` package and `NODE_ICU_DATA
   }
 ```
 
-**`package.json`** — remove `NODE_ICU_DATA` from test script (line 22):
+**`package.json`** — removed `NODE_ICU_DATA` from test script:
 ```diff
 - "test": "NODE_ENV=development NODE_ICU_DATA=./node_modules/full-icu TZ='America/Los_Angeles' jest"
 + "test": "NODE_ENV=development TZ='America/Los_Angeles' jest"
 ```
+The env var pointed at the now-removed package. Node's built-in ICU provides the same locale data, so the test script no longer needs it.
 
-### Validation
-```bash
-pnpm install
-pnpm exec tsc --build --force
-pnpm test
-```
-All Intl/date tests must still pass — they should, since Node provides full ICU natively.
+### Validation result
+- **Compilation**: passes cleanly
+- **Tests**: same 6 pre-existing Node 22 ICU failures, no new failures. All Intl/date tests that were passing before continue to pass — confirms Node's built-in ICU is sufficient.
+- **Stale ICU guards in tests**: several test files still log `"To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'"`. These guards are now obsolete since Node provides full ICU natively. They should be removed in Step 5 alongside the ICU test expectation updates — see Step 5 for details.
 
 ---
 
@@ -200,6 +198,15 @@ Node 22 ships updated ICU locale data that changes formatting output. The follow
 - **`ru` locale** (`test/dates/formatting.test.ts:41`): `"четверг, 28 июня 2001 г."` — visually identical but different Unicode codepoints (likely thin space vs regular space)
 - **`ar` formatToParts** (`test/money/parsing.test.ts:240`): leading RTL mark `‏` literal part no longer emitted — ponyfill expectation needs to match new native output
 - These failures appear in 4 test suites: `dates.test.ts`, `datum.test.ts`, `formatting.test.ts`, `parsing.test.ts`
+
+### Stale ICU guard cleanup required
+Several test files contain `console.log` guards that check for `NODE_ICU_DATA` and warn if it's not set. These were needed when Node didn't bundle full ICU, but are now obsolete (Node 18+ includes full ICU). The guards were surfaced in Step 3 after removing the `NODE_ICU_DATA` env var from the test script. Files containing the stale guard (identified from test output):
+- `test/dates/dates.test.ts:273`
+- `test/dates/formatting.test.ts:10`
+- `test/dates/datum.test.ts:20`, `:323`, `:379`
+- `test/money/parsing.test.ts:261`
+
+These guards should be removed entirely — they are no longer useful since no external ICU package is needed.
 
 ### Validation
 ```bash
