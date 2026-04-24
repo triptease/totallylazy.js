@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "moduleResolution": "node10",
+        "useDefineForClassFields": false,
         "composite": true,
         "skipLibCheck": true,
         "noImplicitThis": true,

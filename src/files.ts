@@ -60,7 +60,7 @@ export class File {
     }
 
     async bytes(): Promise<Uint8Array> {
-        return await promisify(fs.readFile)(this.absolutePath);
+        return new Uint8Array(await promisify(fs.readFile)(this.absolutePath));
     }
 
     async content(newContent?: string): Promise<string> {
