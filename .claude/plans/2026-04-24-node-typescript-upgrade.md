@@ -267,27 +267,20 @@ Changed from asserting a specific interleaving order to asserting all expected l
 
 ---
 
-## Step 7 (optional): Migrate jest.config.js ts-jest config — TODO
+## Step 7 (optional): Migrate jest.config.js ts-jest config ✅ DONE
 
-The `globals['ts-jest']` configuration path is deprecated in ts-jest 28+. Migrate to the `transform` key.
-
-### Files to change
+### Changes made
 
 **`jest.config.js`**:
 ```diff
   module.exports = {
 -   preset: 'ts-jest',
     testEnvironment: 'node',
-    testMatch: ['**/test/**/*.test.ts'],
-    moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
-    collectCoverageFrom: [
-      'src/**/*.ts',
-      '!src/**/*.d.ts',
-    ],
+    ...
 -   globals: {
 -     'ts-jest': {
 -       tsconfig: {
--         target: 'ES6',
+-         target: 'ES2022',
 -         module: 'commonjs',
 -       },
 -     },
@@ -300,17 +293,18 @@ The `globals['ts-jest']` configuration path is deprecated in ts-jest 28+. Migrat
 +       },
 +     }],
 +   },
-    setupFiles: [],
-    testTimeout: 10000,
-    maxWorkers: 1,
-  };
 ```
 
-### Validation
-```bash
-pnpm exec tsc --build --force
-pnpm test
-```
+Two changes:
+
+1. **Moved ts-jest config from `globals` to `transform`**: The `globals['ts-jest']` configuration path was deprecated in ts-jest 28 in favour of passing options via the `transform` key. While it still worked in ts-jest 29, it emitted a deprecation warning on every test run. The `transform` key is the officially supported way to pass ts-jest options going forward, and eliminates the warning.
+
+2. **Removed `preset: 'ts-jest'`**: The preset auto-configured the `transform` key to use ts-jest for `.ts`/`.tsx` files. Since we now set the `transform` key explicitly with the same pattern (`'^.+\\.tsx?$'`), the preset is redundant — keeping it would apply the transform twice. Removing it makes the configuration explicit and self-contained.
+
+### Validation result
+- **Compilation**: passes cleanly
+- **Tests**: 412 passed, 20 suites, 0 failures
+- **ts-jest deprecation warning**: gone
 
 ---
 
