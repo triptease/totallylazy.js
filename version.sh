@@ -11,4 +11,4 @@ else
 fi
 
 export REVISIONS=$(git rev-list --count ${BRANCH})
-export VERSION=0.${REVISIONS}.${BUILD_NUMBER}
+export VERSION=1.${REVISIONS}.${BUILD_NUMBER}
