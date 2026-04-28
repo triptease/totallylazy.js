@@ -13,7 +13,7 @@ describe('ImplicitMoneyParser', () => {
             /Expected string/
         );
         expect(implicitMoneyParser({currency: 'GBP', locale: 'en'}).parseAll(null as any)).toEqual([]);
-        expect(implicitMoneyParser({currency: 'GBP', locale: 'en'}).parseAll(0.1 as any)).toEqual([]);
+        expect(implicitMoneyParser({currency: 'GBP', locale: 'en'}).parseAll(0.1 as any)).toEqual([{amount: 0.1, currency: 'GBP'}]);
     });
 
     it('can parse and convert a number with a currency provided else where', function () {
@@ -55,7 +55,7 @@ describe('NumberParser', () => {
     it(`handles bad inputs`, function () {
         expect(() => numberParser('en').parse(undefined as any)).toThrow(/Expected string/);
         expect(numberParser('en').parseAll(null as any)).toEqual([]);
-        expect(numberParser('en').parseAll(0.1 as any)).toEqual([]);
+        expect(numberParser('en').parseAll(0.1 as any)).toEqual([0.1]);
     });
 
     it('can infer decimal separator from locale', function () {
