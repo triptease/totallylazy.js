@@ -1,4 +1,3 @@
-import {runningInNode} from '../../src/node';
 import {
     date,
     dayOf,
@@ -268,14 +267,6 @@ describe('SmartDate and Pivot', () => {
 });
 
 describe('dates', function () {
-    beforeAll(function () {
-        if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
-            console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            // Skip all tests in this suite
-            return;
-        }
-    });
-
     it('examples', () => {
         expect(parser('ca', 'dd / MMMM / yyyy').parseAll('des de 19 / abril / 2022 fins a 20 / abril / 2022')).toEqual([
             date(2022, 4, 19),
@@ -473,7 +464,7 @@ describe('dates', function () {
                 month: 'short',
                 weekday: 'short',
             },
-            'vr 25 jan. 2019'
+            'vr 25 jan 2019'
         );
         assertFormat(
             'nl',

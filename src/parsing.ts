@@ -163,6 +163,7 @@ export class RuntimeSafeParser<T> implements Parser<T> {
     }
 
     parseAll(value: unknown): T[] {
+        if (typeof value === 'number') return this.parser.parseAll(String(value));
         if (typeof value !== 'string') return [];
         return this.parser.parseAll(value);
     }

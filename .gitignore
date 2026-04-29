@@ -6,3 +6,9 @@ node_modules
 *.log
 dist
 tsconfig.tsbuildinfo
+
+# Compiled TypeScript output
+*.js
+*.js.map
+*.d.ts
+!jest.config.js

@@ -11,17 +11,9 @@ import {
     WeekdaysBuilder,
 } from '../../src/dates';
 
-import {runningInNode} from '../../src/node';
 import {assertParse, options, supported} from './dates.test';
 
 describe('Months', function () {
-    beforeAll(function () {
-        if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
-            console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            // Skip all tests in this suite
-            return;
-        }
-    });
 
     it('can get months for specific locals and formats', () => {
         expect(months('en-GB')).toEqual([
@@ -318,13 +310,6 @@ describe('Months', function () {
 });
 
 describe('Weekdays', function () {
-    beforeAll(function () {
-        if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
-            console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            // Skip all tests in this suite
-            return;
-        }
-    });
 
     it('works', () => {
         const en = new WeekdaysBuilder().build('en-GB');
@@ -374,13 +359,6 @@ describe('Weekdays', function () {
 });
 
 describe('weekdays and months', function () {
-    beforeAll(function () {
-        if (runningInNode() && process.env.NODE_ICU_DATA != './node_modules/full-icu') {
-            console.log("To run these tests you must set 'NODE_ICU_DATA=./node_modules/full-icu'");
-            // Skip all tests in this suite
-            return;
-        }
-    });
 
     it('non native version can still extract months from simple long format', () => {
         expect(months('en-GB', 'long')).toEqual([

@@ -71,15 +71,15 @@ export class File {
         return (await promisify(fs.readFile)(this.absolutePath, 'utf-8')).toString();
     }
 
-    read(options?: StreamOptions): Readable {
+    read(options?: Parameters<typeof fs.createReadStream>[1]): Readable {
         return fs.createReadStream(this.absolutePath, options);
     }
 
-    async append(data: any, options?: FileOptions): Promise<void> {
-        return await promisify(fs.appendFile)(this.absolutePath, data, options);
+    async append(data: any, options?: Parameters<typeof fs.appendFile>[2]): Promise<void> {
+        return await promisify(fs.appendFile)(this.absolutePath, data, options as fs.WriteFileOptions);
     }
 
-    write(options?: StreamOptions): Writable {
+    write(options?: Parameters<typeof fs.createWriteStream>[1]): Writable {
         return fs.createWriteStream(this.absolutePath, options);
     }
 
@@ -109,17 +109,8 @@ export class File {
     }
 }
 
-export type FileOptions = {encoding?: string | null; mode?: string | number; flag?: string} | string;
+/** @deprecated Use `Parameters<typeof fs.createReadStream>[1]` or Node's `BufferEncoding | fs.ReadStreamOptions` instead */
+export type StreamOptions = Parameters<typeof fs.createReadStream>[1];
 
-export type StreamOptions =
-    | string
-    | {
-          flags?: string;
-          encoding?: string;
-          fd?: number;
-          mode?: number;
-          autoClose?: boolean;
-          start?: number;
-          end?: number;
-          highWaterMark?: number;
-      };
+/** @deprecated Use `Parameters<typeof fs.appendFile>[2]` or Node's `fs.WriteFileOptions` instead */
+export type FileOptions = Parameters<typeof fs.appendFile>[2];
